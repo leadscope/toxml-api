@@ -1,9 +1,17 @@
 ToxML API
 =========
 
-Provides an implementation of the ToxML specification. There are two parts to the
-project, the main stucco module and the stucco-builder-plugin module, which is used
-to generate the concrete model objects from the current specification.
+For the upcoming update of the ToxML specification, the ToxML foundation has moved
+towards opening the standard, and allowing external contributions. To this end
+a community site has been created that allows the viewing and modification of
+the working draft of the specification (http://toxml.lhasalimited.org/working-draft).
+As part of this site, the specification can be downloaded in a concise XML format 
+(toxml_specification.xml). This project takes that specification and generates
+a Java API that provides a data model, a parser, and a serializer.
+
+There are two parts to the project, the main stucco module and the 
+stucco-builder-plugin module, which is used to generate the concrete model objects 
+from the current specification.
 
 Installation
 ------------
