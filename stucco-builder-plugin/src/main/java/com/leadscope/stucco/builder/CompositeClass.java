@@ -147,27 +147,20 @@ public class CompositeClass extends ToxmlClass {
     return sb.toString();
   }
   
-  public boolean equivalent(ToxmlClass other) {
+  public boolean isEquivalent(ToxmlClass other) {
     if (!getClass().equals(other.getClass())) {
       return false;
     }
     
     CompositeClass otherComposite = (CompositeClass)other;
-    
-    List<String> myTags = getMemberTags();
-    List<String> otherTags = otherComposite.getMemberTags();    
-    if (myTags.size() != otherTags.size()) { 
+    if (members.size() != otherComposite.members.size()) {
       return false;
     }
-    for (int i = 0; i < myTags.size(); i++) {
-      String myTag = myTags.get(i);
-      String otherTag = otherTags.get(i);
-      if (!myTag.equals(otherTag)) {
-        return false;
-      }
-      ToxmlClass myClass = getType(myTag);
-      ToxmlClass otherClass = otherComposite.getType(otherTag);
-      if (!myClass.equivalent(otherClass)) {
+    
+    for (int i = 0; i < members.size(); i++) {
+      CompositeMember myMember = members.get(i);
+      CompositeMember otherMember = otherComposite.members.get(i);
+      if (!myMember.isEquivalent(otherMember)) {
         return false;
       }
     }

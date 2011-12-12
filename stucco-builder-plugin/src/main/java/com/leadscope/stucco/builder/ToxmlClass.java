@@ -14,6 +14,7 @@ public abstract class ToxmlClass {
   private static StringTemplateGroup templateGroup = new StringTemplateGroup("stuccoGroup");
   
   private String name;
+  private String studyTypeName;
   private String packageName;
   private boolean hasUnits;
   private String description;
@@ -65,15 +66,18 @@ public abstract class ToxmlClass {
     }
   }
   
-  public void setPackageName(String packageName) {
-    this.packageName = camelCase(packageName);
+  public void setStudyTypeName(String studyTypeName) {
+    this.studyTypeName = studyTypeName;
+    this.packageName = camelCase(studyTypeName);
   }  
+    
+  public String getStudyTypeName() {
+    return studyTypeName;
+  }
   
   public abstract Collection<String> getChildTypeNames();
   
-  public abstract boolean equivalent(ToxmlClass other);
-
-  public abstract ToxmlClass copy(String newName);
+  public abstract boolean isEquivalent(ToxmlClass other);
   
   public abstract boolean isUsingModelPackage();
   public abstract boolean isUsingUtilPackage();

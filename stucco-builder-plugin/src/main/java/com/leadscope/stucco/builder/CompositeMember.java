@@ -4,23 +4,65 @@
  */
 package com.leadscope.stucco.builder;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Member of a CompositeClass
  */
-public class CompositeMember {
+public class CompositeMember implements ToxmlClassParent {
   private String tag;
   private String description;
   private ToxmlClass type;
-  private List<String> preferredUnits = new ArrayList<String>();
+  private NavigableSet<String> preferredUnits = new TreeSet<String>();
   private String elementId;
   private List<Vocabulary> vocabularies = new ArrayList<Vocabulary>();
   
   public CompositeMember(String tag, ToxmlClass type) {
     this.tag = tag;
     this.type = type;
+  }
+  
+  public boolean isEquivalent(CompositeMember other) {
+    if (!tag.equals(other.getTag())) {
+      return false;
+    }    
+    if (description == null) {
+      if (other.description != null) {
+        return false;
+      }
+    }
+    else if (!description.equals(other.description)) {
+      return false;
+    }    
+    if (!type.isEquivalent(other.type)) {
+      return false;
+    }
+    if (preferredUnits.size() != other.preferredUnits.size()) {
+      return false;
+    }
+    for (String unit : preferredUnits) {
+      if (!other.preferredUnits.contains(unit)) {
+        return false;
+      }
+    }
+    if (vocabularies.size() != other.vocabularies.size()) {
+      return false;
+    }
+    for (int i = 0; i < vocabularies.size(); i++) {
+      if (!vocabularies.get(i).isEquivalent(other.vocabularies.get(i))) {
+        return false;
+      }
+    }
+        
+    return true;
+  }
+  
+  public void setChildClass(ToxmlClass type) {
+    setType(type);
+  }
+  
+  public ToxmlClass getChildClass() {
+    return getType();
   }
   
   public ToxmlClass getType() {
@@ -60,7 +102,7 @@ public class CompositeMember {
   }
   
   public List<String> getPreferredUnits() {
-    return preferredUnits;
+    return new ArrayList<String>(preferredUnits);
   }
 
   public boolean isBoolean() {

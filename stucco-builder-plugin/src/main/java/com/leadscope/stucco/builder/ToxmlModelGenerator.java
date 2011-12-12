@@ -19,6 +19,7 @@ public class ToxmlModelGenerator {
   private Map<String, ToxmlClass> typesMap = createPrimitiveTypeMap();
   private Map<String, Element> elementIdMap = new HashMap<String, Element>();
   private Map<String, CompositeMember> elementIdCompositeMemberMap = new HashMap<String, CompositeMember>();
+  private Map<String, List<ToxmlClassParent>> typeNamesToParents = new HashMap<String, List<ToxmlClassParent>>();
 
   private List<ToxmlClass> toxmlClasses = new ArrayList<ToxmlClass>();
   private ToxmlClass compoundClass;
@@ -36,6 +37,7 @@ public class ToxmlModelGenerator {
     createClasses();
     renameStudyTreatmentTypes();
     updateVocabularyDependentFields();
+    mergeEquivalentTypes();
     
     List<String> typeNames = new ArrayList<String>(typesMap.keySet());
     Collections.sort(typeNames);
@@ -111,7 +113,7 @@ public class ToxmlModelGenerator {
           type.addValue(valueElement.getValue());
         }
         type.setDescription(optionalStringValue(node, Spec.DESCRIPTION));
-        typesMap.put(typeName, type);
+        addToTypesMap(type);
         System.out.println("Added type: " + type);
       }
     }    
@@ -121,13 +123,11 @@ public class ToxmlModelGenerator {
         if (typeName.endsWith(Spec.STUDY_TREATMENT)) {
           String studyTypeName = typeName.substring(0, typeName.length() - Spec.STUDY_TREATMENT.length());
           ToxmlClass createdClass = createClass(complexDefElement);
-          typesMap.remove(createdClass.getName());
-          System.out.println("Removed previously created treatment type: " + createdClass.getName());
-          
+          typesMap.remove(createdClass.getName());          
           createdClass.setName(typeName);
-          createdClass.setPackageName(studyTypeName);
+          createdClass.setStudyTypeName(studyTypeName);
           createdClass.setDescription(optionalStringValue(node, Spec.DESCRIPTION));
-          typesMap.put(typeName, createdClass);
+          addToTypesMap(createdClass);
           System.out.println("Added treatment type: " + createdClass);
         }
         else {
@@ -137,6 +137,13 @@ public class ToxmlModelGenerator {
     }
   }
 
+  private void addToTypesMap(ToxmlClass type) {
+    if (type.getName() == null) {
+      throw new IllegalArgumentException("Tried to add type with null name: " + type.getClass());
+    }
+    typesMap.put(type.getName(), type);
+  }
+  
   private void createClasses() {
     Elements nodes = rootElement.getChildElements(Spec.ELEMENT);
     for (int i = 0; i < nodes.size(); i++) {
@@ -167,7 +174,7 @@ public class ToxmlModelGenerator {
     CollectionClass collection;
     if (isStudyList(node)) {
       collection = new StudyListClass();
-      collection.setPackageName(getStudyTypeName(node));
+      collection.setStudyTypeName(getStudyTypeName(node));
     }
     else if (isSet) {
       if (hasCompositeChild(node)) {
@@ -192,6 +199,7 @@ public class ToxmlModelGenerator {
     
     collection.setChildTag(childTag);
     collection.setChildClass(childClass);
+    addChildReference(childClass, collection);
     
     return nameCheckAndAddType(node, collection);
   }
@@ -224,6 +232,7 @@ public class ToxmlModelGenerator {
       ToxmlClass childClass = createOrAddType(childElement);
       
       CompositeMember member = composite.addMember(childTag, childClass);
+      addChildReference(childClass, member);
       composite.setDescription(childTag, optionalStringValue(childElement, Spec.DESCRIPTION));
       member.setElementId(childElementId);
       elementIdCompositeMemberMap.put(childElementId, member);
@@ -240,34 +249,70 @@ public class ToxmlModelGenerator {
       }
       
       if (isStringValue(childElement, Spec.TYPE, Spec.STRING)) {
-        Elements vocabElements = childElement.getChildElements(Spec.VOCABULARY);
-        for (int j = 0; j < vocabElements.size(); j++) {
-          Element vocabElement = vocabElements.get(j);
-          Vocabulary vocab = new Vocabulary();
-          Elements vocabValuesElements = vocabElement.getChildElements(Spec.VALUE);
-          for (int k = 0; k < vocabValuesElements.size(); k++) {
-            vocab.addValue(vocabValuesElements.get(k).getValue());
-          }
-          Elements dependentFieldElements = vocabElement.getChildElements(Spec.DEPENDENT_FIELD);
-          for (int k = 0; k < dependentFieldElements.size();k++) {
-            Element dependentFieldElement = dependentFieldElements.get(k);
-            String depElementId = stringValue(dependentFieldElement, Spec.ELEMENT_ID);
-            String depValue = stringValue(dependentFieldElement, Spec.VALUE);          
-            vocab.addDependentField(depElementId, depValue);
-          }
-          member.addVocabulary(vocab);
-        }
+        addVocabularyToMember(childElement, member);
       }
     }
     
     return nameCheckAndAddType(node, composite);
   }  
   
+  private void addChildReference(ToxmlClass childClass, ToxmlClassParent parent) {
+    List<ToxmlClassParent> parents = typeNamesToParents.get(childClass.getName());
+    if (parents == null) {
+      parents = new ArrayList<ToxmlClassParent>();
+      typeNamesToParents.put(childClass.getName(), parents);
+    }
+    parents.add(parent);
+  }
+  
+  private void updateChildReferences(String oldStudyTypeName, ToxmlClass newClass) {
+    List<ToxmlClassParent> parents = typeNamesToParents.get(oldStudyTypeName);
+    if (parents != null) {
+      for (ToxmlClassParent parent : parents) {
+        parent.setChildClass(newClass);
+      }
+    }
+    typeNamesToParents.remove(oldStudyTypeName);
+    
+    List<ToxmlClassParent> newParents = typeNamesToParents.get(newClass.getName());
+    if (newParents == null) {
+      typeNamesToParents.put(newClass.getName(), parents);
+    }
+    else {
+      newParents.addAll(parents);
+    }
+  }
+  
+  private void addVocabularyToMember(Element childElement, CompositeMember member) {
+    Elements vocabElements = childElement.getChildElements(Spec.VOCABULARY);
+    for (int j = 0; j < vocabElements.size(); j++) {
+      Element vocabElement = vocabElements.get(j);
+      Vocabulary vocab = new Vocabulary();
+      Elements vocabValuesElements = vocabElement.getChildElements(Spec.VALUE);
+      for (int k = 0; k < vocabValuesElements.size(); k++) {
+        vocab.addValue(vocabValuesElements.get(k).getValue());
+      }
+      Elements dependentFieldElements = vocabElement.getChildElements(Spec.DEPENDENT_FIELD);
+      for (int k = 0; k < dependentFieldElements.size();k++) {
+        Element dependentFieldElement = dependentFieldElements.get(k);
+        String depElementId = stringValue(dependentFieldElement, Spec.ELEMENT_ID);
+        String depValue = stringValue(dependentFieldElement, Spec.VALUE);          
+        vocab.addDependentField(depElementId, depValue);
+      }
+      member.addVocabulary(vocab);
+    }
+  }
+  
   private String createTypeName(Element element, boolean includeStudyTypeName) {
     String name = stringValue(element, Spec.TAG);
     name = name.replace("-", "_");    
     
-    if (isControl(element)) {
+    String parentTag = optionalStringValue(element.getParent(), Spec.TAG);
+    
+    if ("TestSubstanceCharacterization".equals(parentTag)) {
+      name = "TestSubstancePropertyList";
+    }
+    else if (isControl(element)) {
       if (isStringValue(element.getParent(), Spec.TAG, Spec.POSITIVE_CONTROL_LIST_TAG)) {
         name = "PositiveTestControl";
       }
@@ -278,23 +323,48 @@ public class ToxmlModelGenerator {
     else if ("ResultFindings".equals(name) && isStringValue(element, Spec.TYPE, Spec.LIST)) {
       name = "ResultFindingsList";
     }
-    else if ("ResultFindings".equals(name) && isStringValue(element.getParent(), Spec.TAG, "ResultFindings")) {
-      name = "ReproDevResultFindings";
+    else if ("Data".equals(name)) {
+      if (parentTag.endsWith("Data")) {
+        name = parentTag + "Value";
+      }
+    }
+    else if ("ResultFindings".equals(name)) {
+      if ("TreatmentResultFindings".equals(parentTag)) {
+        name = "GenericResultFindings";
+      }
+      else if ("TestResultFindings".equals(parentTag)) {
+        name = "GenericTestResultFindings";
+      }
+      else {
+        name = parentTag + "ResultFindings";
+      }
     }
     else if ("Substance".equals(name) && isStringValue(element, Spec.TYPE, Spec.COMPOSITE)) {
-      name = "SubstanceQuantity";
+      name = parentTag + "SubstanceQuantity";
     }    
     else if ("OriginalDosageRegimen".equals(name)) {
       name = "DosageRegimen";
     }
     else if (isCompoundRoot(element)) {
       name = "CompoundRecord";
-    }    
+    }
+    else if ("Property".equals(name)) {
+      String grandparentTag = stringValue(element.getParent().getParent(), Spec.TAG);
+      if (grandparentTag.equals("TestSubstanceCharacterization")) {
+        name = "TestSubstanceProperty";
+      }
+      else {
+        if (parentTag.endsWith("Properties")) {
+          name = parentTag.substring(0, parentTag.length() - "Properties".length()) +
+              "Property";
+        }
+      }
+    }
     else if ("InChI".equals(name) && isStringValue(element, Spec.TYPE, Spec.SET)) {
-      name = "InChIs";
+      name = "InChIList";
     }
     else if ("Smiles".equals(name) && isStringValue(element, Spec.TYPE, Spec.SET)) {
-      name = "SmilesSet";
+      name = "SmilesList";
     }
 
     if (includeStudyTypeName) {
@@ -348,13 +418,12 @@ public class ToxmlModelGenerator {
     String studyTypeName = getStudyTypeName(element);
     
     newClass.setName(typeName);
-    newClass.setPackageName(studyTypeName);
+    newClass.setStudyTypeName(studyTypeName);
     newClass.setDescription(optionalStringValue(element, Spec.DESCRIPTION));
-        
-    System.out.println("Looking to add " + typeName + " under " + studyTypeName);
+    
     ToxmlClass definedClass = typesMap.get(typeName);
     if (definedClass != null) {
-      if (definedClass.equivalent(newClass)) {
+      if (definedClass.isEquivalent(newClass)) {
         return definedClass;
       }
       else {
@@ -363,8 +432,10 @@ public class ToxmlModelGenerator {
       }
     }
 
-    allStudyTypeNames.add(studyTypeName);
-    typesMap.put(typeName, newClass);
+    if (studyTypeName != null) {
+      allStudyTypeNames.add(studyTypeName);
+    }
+    addToTypesMap(newClass);
     System.out.println("Added class: " + newClass);
     
     return newClass;
@@ -587,6 +658,70 @@ public class ToxmlModelGenerator {
     }
         
     return null;
+  }
+  
+  private void mergeEquivalentTypes() {
+    System.out.println("Merging equivalent types - may take a moment...");
+    
+    // these will no longer be valid after merging types
+    elementIdMap = null;
+    elementIdCompositeMemberMap = null;
+      
+    Set<String> consideredTypeNames = new HashSet<String>();
+    List<ToxmlClass> allClasses = new ArrayList<ToxmlClass>(typesMap.values());
+    
+    for (ToxmlClass type : allClasses) {
+      String typeName = type.getName();
+      String studyTypeName = type.getStudyTypeName();
+      if (studyTypeName != null) {
+        String targetTypeName = typeName.substring(studyTypeName.length(), typeName.length());
+        if (!consideredTypeNames.contains(targetTypeName)) {
+          consideredTypeNames.add(targetTypeName);
+          ToxmlClass oldGenericType = typesMap.get(targetTypeName);
+          if (oldGenericType == null || oldGenericType.isEquivalent(type)) {
+            boolean allEquivalent = true;
+            Set<String> otherStudyTypeNames = new HashSet<String>();
+            for (String nextStudyTypeName : allStudyTypeNames) {
+              ToxmlClass otherType = typesMap.get(nextStudyTypeName + targetTypeName);
+              if (otherType != null && otherType != type) {
+                if (!otherType.isEquivalent(type)) {
+                  System.out.println(type.getName() + " is not equivalent to generic " + otherType.getName());
+                  allEquivalent = false;
+                  break;
+                }
+                otherStudyTypeNames.add(nextStudyTypeName);
+              }
+            }
+            if (allEquivalent && (oldGenericType != null || otherStudyTypeNames.size() > 0)) {
+              mergeToGenericType(targetTypeName);
+            }
+          }
+          else {
+            System.out.println(type.getName() + " is not equivalent to generic " + oldGenericType.getName());
+          }
+        }
+      }
+    }
+  }
+    
+  private void mergeToGenericType(String targetTypeName) {
+    System.out.println("Merging to generic type: " + targetTypeName);
+    ToxmlClass genericType = typesMap.get(targetTypeName);
+    for (String studyTypeName : allStudyTypeNames) {
+      String oldStudyTypeName = studyTypeName + targetTypeName;
+      ToxmlClass oldStudyType = typesMap.get(oldStudyTypeName);
+      if (oldStudyType != null) {
+        if (genericType == null) {
+          genericType = oldStudyType;
+          genericType.setName(targetTypeName);
+          genericType.setStudyTypeName(null);
+          addToTypesMap(genericType);
+        }
+        System.out.println("  Moved " + oldStudyTypeName);
+        updateChildReferences(oldStudyTypeName, genericType);
+        typesMap.remove(oldStudyTypeName);
+      }
+    }
   }
   
   private String join(String delimiter, String... strings) {

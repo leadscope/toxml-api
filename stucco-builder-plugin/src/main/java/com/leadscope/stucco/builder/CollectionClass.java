@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.antlr.stringtemplate.StringTemplate;
 
-public abstract class CollectionClass extends ToxmlClass {
+public abstract class CollectionClass extends ToxmlClass implements ToxmlClassParent {
   private String childTag;
   private ToxmlClass childClass;
   
@@ -20,7 +20,7 @@ public abstract class CollectionClass extends ToxmlClass {
   public void setChildTag(String childTag) {
     this.childTag = childTag;
   }
-  
+    
   public ToxmlClass getChildClass() {
     return childClass;
   }
@@ -68,7 +68,7 @@ public abstract class CollectionClass extends ToxmlClass {
     }
   }
   
-  public boolean equivalent(ToxmlClass other) {
+  public boolean isEquivalent(ToxmlClass other) {
     if (!getClass().equals(other.getClass())) {
       return false;
     }
@@ -78,7 +78,7 @@ public abstract class CollectionClass extends ToxmlClass {
       return false;
     }
     
-    return childClass.equivalent(otherCollection.childClass);
+    return childClass.isEquivalent(otherCollection.childClass);
   }
   
   public void changeChildType(String oldTypeName, ToxmlClass newClass) {

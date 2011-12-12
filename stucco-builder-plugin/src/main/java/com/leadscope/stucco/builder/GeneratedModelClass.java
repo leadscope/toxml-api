@@ -29,7 +29,7 @@ public class GeneratedModelClass extends ToxmlClass {
     return new ArrayList<String>(0);
   }
 
-  public boolean equivalent(ToxmlClass other) {
+  public boolean isEquivalent(ToxmlClass other) {
     return false;
   }
 

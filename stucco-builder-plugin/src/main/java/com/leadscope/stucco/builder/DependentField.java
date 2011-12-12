@@ -12,6 +12,10 @@ public class DependentField {
   private String value;
   private String relativePath;
   
+  public boolean isEquivalent(DependentField other) {
+    return value.equals(other.value) && relativePath.equals(other.relativePath);
+  }
+  
   public String getElementId() {
     return elementId;
   }

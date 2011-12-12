@@ -46,7 +46,7 @@ public class EnumeratedTypeClass extends ToxmlClass {
     st.setAttribute("values", values);
   }
 
-  public boolean equivalent(ToxmlClass other) {
+  public boolean isEquivalent(ToxmlClass other) {
     if (!getClass().equals(other.getClass())) {
       return false;
     }

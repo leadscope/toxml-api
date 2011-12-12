@@ -28,7 +28,7 @@ public class PrimitiveClass extends ToxmlClass {
     return false;
   }
 
-  public boolean equivalent(ToxmlClass other) {
+  public boolean isEquivalent(ToxmlClass other) {
     if (!getClass().equals(other.getClass())) {
       return false;
     }
