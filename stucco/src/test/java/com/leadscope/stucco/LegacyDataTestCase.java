@@ -8,19 +8,31 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
-import com.leadscope.stucco.io.ToxmlHandler;
-import com.leadscope.stucco.io.ToxmlReader;
+import com.leadscope.stucco.io.*;
 import com.leadscope.stucco.model.CompoundRecord;
 
 public class LegacyDataTestCase extends TestCase {  
-  public void testFdaGenetox() throws Throwable {
+  public void testReading() throws Throwable {
+    File inputFile = new File("src/test/resources/fdagenetox-test.xml"); 
     ToxmlReader.parseList(
-        new File("src/test/resources/fdagenetox-test.xml"), 
+        inputFile, 
         CompoundRecord.class,
         new ToxmlHandler<CompoundRecord>() {
-          public void handle(CompoundRecord obj) {
-            System.out.println(obj.getIds().get(0).getValue());
+          public void handle(CompoundRecord obj) throws Exception {
+            System.out.print(obj.getIds().get(0).toDisplayableString() + " ");           
           }
         });
+    System.out.println();
+  }
+  
+  public void testReadingAndWriting() throws Throwable {
+    File outputDir = new File("target/test-result-files");
+    outputDir.mkdirs();
+    File outputFile = new File(outputDir, "LegacyDataTestCase-fdagenetox.xml");
+    File inputFile = new File("src/test/resources/fdagenetox-test.xml"); 
+    
+    ToxmlWriter.write("Compounds", "Compound",
+        new ToxmlFileSource<CompoundRecord>(inputFile, CompoundRecord.class), 
+        outputFile);
   }
 }

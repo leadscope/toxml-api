@@ -4,8 +4,7 @@
  */
 package com.leadscope.stucco.io;
 
-import java.io.OutputStream;
-import java.io.StringWriter;
+import java.io.*;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
@@ -17,11 +16,19 @@ import com.leadscope.stucco.util.StringUtil;
 //import com.sun.xml.internal.txw2.output.IndentingXMLStreamWriter;
 
 /**
- * Writes toxml objects to an xml stream
+ * Writes toxml objects to an xml stream. After constructing the writer, use the visit
+ * methods to write objects to the stream. Be sure to call close() when finished writing.
  */
 public class ToxmlWriter implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants {
   private XMLStreamWriter writer;
     
+  /**
+   * Writes the obj to a string of containing the xml
+   * @param rootTag the root tag to use for the document
+   * @param obj the object to serialize
+   * @return the string containing the xml
+   * @throws Exception
+   */  
   public static String toString(String rootTag, ToxmlObject obj) throws Exception {
     StringWriter sw = new StringWriter();
     ToxmlWriter writer = new ToxmlWriter(
@@ -32,14 +39,93 @@ public class ToxmlWriter implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
     return sw.toString();
   }
   
+  /**
+   * Writes a single toxml object to the output stream. Closes the output stream
+   * when done 
+   * @param rootTag the root tag to use for the document
+   * @param obj the object to serialize
+   * @param os the output stream to write to - this will be closed by this method
+   * @throws Exception if something goes awry
+   */
   public static void write(String rootTag, ToxmlObject obj, OutputStream os) throws Exception {
     ToxmlWriter writer = new ToxmlWriter(
         rootTag,
         XMLOutputFactory.newInstance().createXMLStreamWriter(os));
-    obj.accept(writer);
-    writer.close();
+    Exception exception = null;
+    try {      
+      obj.accept(writer);
+    }
+    catch (Exception e) {
+      exception = e;
+    }
+    finally {
+      try { writer.close(); } catch (Exception e) {
+        if (exception == null) {
+          throw e;
+        }
+      }
+      if (exception != null) {
+        throw exception;
+      }
+    }
   }
-    
+
+  /**
+   * Writes the streamed objects to the given file. 
+   * @param rootTag the root document tag under which the objects will be written
+   * @param childTag the tag with which each child will be written 
+   * @param iterable the stream of objects to write
+   * @param file the file to write to
+   * @throws Exception if something goes awry
+   */
+  public static void write(      
+      String rootTag, 
+      String childTag,
+      Iterable<? extends ToxmlObject> iterable,
+      File file) throws Exception {
+    write(rootTag, childTag, iterable, new FileOutputStream(file));
+  }
+  
+  /**
+   * Writes the streamed objects to the given output stream. This method will also close the
+   * output stream
+   * @param rootTag the root tag under which the objects will be written
+   * @param childTag the tag with which each child will be written 
+   * @param iterable the stream of objects to write
+   * @param os the output stream to write to - will be closed by this method when complete
+   * @throws Exception if something goes awry
+   */
+  public static void write(
+      String rootTag, 
+      String childTag,
+      Iterable<? extends ToxmlObject> iterable, 
+      OutputStream os) throws Exception {
+    ToxmlWriter writer = new ToxmlWriter(rootTag, os);
+    Exception exception = null;
+    try {      
+      for (ToxmlObject obj : iterable) {
+        writer.write(childTag, obj);
+      }
+    }
+    catch (Exception e) {
+      exception = e;
+    }
+    finally {
+      try { writer.close(); } catch (Exception e) {
+        if (exception == null) {
+          throw e;
+        }
+      }
+      if (exception != null) {
+        throw exception;
+      }
+    }
+  }
+  
+  public ToxmlWriter(String rootTag, OutputStream os) throws Exception {
+    this(rootTag, XMLOutputFactory.newInstance().createXMLStreamWriter(os));
+  }
+  
   public ToxmlWriter(String rootTag, XMLStreamWriter writer) throws Exception {
     // this.writer = new IndentingXMLStreamWriter(writer);
     this.writer = writer;
@@ -51,6 +137,17 @@ public class ToxmlWriter implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
     writer.writeEndElement();
     writer.writeEndDocument();
     writer.close();
+  }
+  
+  /**
+   * Writes the given object to the writer under the given tag
+   * @param tag the tag under which the object will be written
+   * @param obj the object to serialize
+   */
+  public void write(String tag, ToxmlObject obj) throws Exception {
+    writer.writeStartElement(tag);
+    obj.accept(this);
+    writer.writeEndElement();
   }
   
   public ToxmlObject visit(CompositeToxmlObject obj) throws Exception {

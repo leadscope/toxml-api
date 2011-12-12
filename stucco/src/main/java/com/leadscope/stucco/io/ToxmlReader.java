@@ -31,12 +31,18 @@ public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
       Class<T> toxmlClass, 
       ToxmlHandler<T> handler) throws Exception {
     FileInputStream fis = new FileInputStream(file);
+    Exception exception = null;
     try {
       parseList(createReader(fis), toxmlClass, handler);
     }
     finally {
       try { fis.close(); } catch (Exception e) { 
-        // don't mask exception during read
+        if (exception != null) {
+          throw exception;
+        }
+        else {
+          throw e;
+        }
       }
     }
   }
