@@ -11,8 +11,8 @@ public class CompoundTestCase extends TestCase {
   public void testCompound() throws Throwable {
     CompoundRecord cr = new CompoundRecord();
     Datum datum = cr.getDatasets().addNew();
-    datum.setName("Foo");
-    datum.setValue(32.1f);
+    datum.setNameValue("Foo");
+    datum.setValueValue(32.1f);
     
     // abstract attributes
     datum.addSource("foo");

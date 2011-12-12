@@ -239,22 +239,24 @@ public class ToxmlModelGenerator {
         }
       }
       
-      Elements vocabElements = childElement.getChildElements(Spec.VOCABULARY);
-      for (int j = 0; j < vocabElements.size(); j++) {
-        Element vocabElement = vocabElements.get(j);
-        Vocabulary vocab = new Vocabulary();
-        Elements vocabValuesElements = vocabElement.getChildElements(Spec.VALUE);
-        for (int k = 0; k < vocabValuesElements.size(); k++) {
-          vocab.addValue(vocabValuesElements.get(k).getValue());
+      if (isStringValue(childElement, Spec.TYPE, Spec.STRING)) {
+        Elements vocabElements = childElement.getChildElements(Spec.VOCABULARY);
+        for (int j = 0; j < vocabElements.size(); j++) {
+          Element vocabElement = vocabElements.get(j);
+          Vocabulary vocab = new Vocabulary();
+          Elements vocabValuesElements = vocabElement.getChildElements(Spec.VALUE);
+          for (int k = 0; k < vocabValuesElements.size(); k++) {
+            vocab.addValue(vocabValuesElements.get(k).getValue());
+          }
+          Elements dependentFieldElements = vocabElement.getChildElements(Spec.DEPENDENT_FIELD);
+          for (int k = 0; k < dependentFieldElements.size();k++) {
+            Element dependentFieldElement = dependentFieldElements.get(k);
+            String depElementId = stringValue(dependentFieldElement, Spec.ELEMENT_ID);
+            String depValue = stringValue(dependentFieldElement, Spec.VALUE);          
+            vocab.addDependentField(depElementId, depValue);
+          }
+          member.addVocabulary(vocab);
         }
-        Elements dependentFieldElements = vocabElement.getChildElements(Spec.DEPENDENT_FIELD);
-        for (int k = 0; k < dependentFieldElements.size();k++) {
-          Element dependentFieldElement = dependentFieldElements.get(k);
-          String depElementId = stringValue(dependentFieldElement, Spec.ELEMENT_ID);
-          String depValue = stringValue(dependentFieldElement, Spec.VALUE);          
-          vocab.addDependentField(depElementId, depValue);
-        }
-        member.addVocabulary(vocab);
       }
     }
     

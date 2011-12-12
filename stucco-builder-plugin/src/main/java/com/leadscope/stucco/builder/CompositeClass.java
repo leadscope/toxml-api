@@ -25,6 +25,20 @@ public class CompositeClass extends ToxmlClass {
     }
   }
   
+  public List<CompositeMember> getMembersWithVocabulary() {
+    List<CompositeMember> membersWithVocab = new ArrayList<CompositeMember>();
+    for (CompositeMember member : members) {
+      if (member.isHasVocabulary()) {
+        membersWithVocab.add(member);
+      }
+    }
+    return membersWithVocab;
+  }
+  
+  public boolean isHasMembersWithVocabulary() {
+    return getMembersWithVocabulary().size() > 0;
+  }
+  
   public Set<String> getChildTypeNames() {
     Set<String> typeNames = new HashSet<String>();
     for (CompositeMember member : members) {

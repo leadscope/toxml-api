@@ -102,6 +102,7 @@ public abstract class ToxmlClass {
   public void generateTemplate(File srcDir) throws Exception {    
     StringTemplate st = templateGroup.getInstanceOf(getTemplateName());
     
+    st.setAttribute("class", this);
     st.setAttribute("packageName", packageName);
     st.setAttribute("className", name);
     st.setAttribute("commentString", getCommentString());

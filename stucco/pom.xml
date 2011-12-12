@@ -47,7 +47,7 @@
         <artifactId>stucco-builder-plugin</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <configuration>
-          <specificationFile>src/main/resources/toxml_specification.xml</specificationFile>
+          <specificationFile>src/source-generation/toxml_specification.xml</specificationFile>
         </configuration>
         <executions>
           <execution>

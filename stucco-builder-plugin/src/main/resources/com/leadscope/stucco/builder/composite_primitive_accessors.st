@@ -1,7 +1,7 @@
 /**
  * @return the $primitive$ value for - $member.commentString$
  */
-public $primitive$ get$member.javaSafeTag$() {
+public $primitive$ get$member.javaSafeTag$Value() {
   if ($member.camelTag$ == null) {
     return null;
   }
@@ -13,7 +13,7 @@ public $primitive$ get$member.javaSafeTag$() {
 /**
  * @return the toxml object value for - $member.commentString$
  */
-public $member.type.name$ get$member.javaSafeTag$Value() {
+public $member.type.name$ get$member.javaSafeTag$() {
   return $member.camelTag$;
 }
 
@@ -22,12 +22,12 @@ public $member.type.name$ get$member.javaSafeTag$Value() {
  * will have its parent set to null
  * @param $member.camelTag$ the $primitive$ value for - $member.commentString$
  */
-public void set$member.javaSafeTag$($primitive$ $member.camelTag$) {
+public void set$member.javaSafeTag$Value($primitive$ $member.camelTag$) {
   if ($member.camelTag$ == null) {
-    set$member.javaSafeTag$Value(null);
+    set$member.javaSafeTag$(null);
   }
   else {
-    set$member.javaSafeTag$Value(new $member.type.name$($member.camelTag$));
+    set$member.javaSafeTag$(new $member.type.name$($member.camelTag$));
   }
 }
 
@@ -36,7 +36,7 @@ public void set$member.javaSafeTag$($primitive$ $member.camelTag$) {
  * parent set to null
  * @param $member.camelTag$ the toxml object value for - $member.commentString$
  */
-public void set$member.javaSafeTag$Value($member.type.name$ $member.camelTag$) {
+public void set$member.javaSafeTag$($member.type.name$ $member.camelTag$) {
   if ($member.camelTag$ != null) {
     if ($member.camelTag$.getParent() != null) {
       throw new IllegalArgumentException(

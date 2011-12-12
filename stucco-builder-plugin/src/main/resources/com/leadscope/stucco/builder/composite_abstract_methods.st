@@ -20,10 +20,10 @@ public ToxmlObject getChild(String tag) { $first(members): { member |
 
 public void setChild(String tag, ToxmlObject value) { $first(members): { member |
   if (tag.equals("$member.tag$")) {
-    this.$member.camelTag$ = ($member.type.name$)value;
+    set$member.javaSafeTag$(($member.type.name$)value);
   } }$ $rest(members): { member |
   else if (tag.equals("$member.tag$")) {
-    this.$member.camelTag$ = ($member.type.name$)value;
+    set$member.javaSafeTag$(($member.type.name$)value);
   } }$
   else {
     throw new IllegalArgumentException("Unknown tag: " + tag);
@@ -40,4 +40,21 @@ public Class<? extends ToxmlObject> getChildClass(String tag) { $first(members):
   else {
     throw new IllegalArgumentException("Unknown tag: " + tag);
   }
+}
+
+public List<String> getVocabulary(String tag) {
+$if (class.hasMembersWithVocabulary)$
+  if (tag.equals("$first(class.membersWithVocabulary).tag$")) {
+    return get$first(class.membersWithVocabulary).javaSafeTag$Vocabulary(); $rest(class.membersWithVocabulary): { member |
+  \}
+  else if (tag.equals("$member.tag$")) \{
+    return get$member.javaSafeTag$Vocabulary(); }$
+  }
+  else {
+    return new ArrayList<String>(0);
+  }
+$else$
+  return new ArrayList<String>(0);
+$endif$
+
 }

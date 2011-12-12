@@ -12,7 +12,7 @@ public class VocabularyTestCase extends TestCase {
     assertFalse("Should not have TA100 when salmonella is not the species",
         ts.getStrainVocabulary().contains("TA100"));
     
-    ts.setSpecies("Salmonella typhimurium");
+    ts.setSpeciesValue("Salmonella typhimurium");
     
     assertTrue("Should have TA100 when salmonella is the species",
         ts.getStrainVocabulary().contains("TA100"));
