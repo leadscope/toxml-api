@@ -38,31 +38,45 @@ public $member.type.name$ get$member.javaSafeTag$() {
 
 $com/leadscope/stucco/builder/normal_composite_setter()$
 
-$endif$ 
+$endif$
 $if (member.hasVocabulary)$
+
 /**
- * Gets the vocabulary values for - $member.commentString$ 
+ * Gets the vocabulary values for - $member.commentString$
  * @return the list of recommended values given the current state of the object
- */ 
-public List<String> get$member.javaSafeTag$Vocabulary() \{ 
-$member.dependencyVocabularies: { vocab | 
+ */
+public List<String> get$member.javaSafeTag$Vocabulary() \{
+$member.dependencyVocabularies: { vocab |
   if (valueByPathEquals(new ToxmlPath("$first(vocab.dependencies).relativePathToParent$"),
                         "$first(vocab.dependencies).value$") $rest(vocab.dependencies): { dep |
       && valueByPathEquals(new ToxmlPath("$dep.relativePathToParent$"),
-                           "$dep.value$") }$) \{ 
+                           "$dep.value$") }$) \{
     return Arrays.asList( $trunc(vocab.values): { value |
         "$value$", }$
-        "$last(vocab.values)$"          
-    ); 
+        "$last(vocab.values)$"
+    );
   \} }$
 $if (member.nonDependencyVocabulary)$
   return Arrays.asList( $trunc(member.nonDependencyVocabulary.values): { value |
       "$value$", }$
-      "$last(member.nonDependencyVocabulary.values)$"          
+      "$last(member.nonDependencyVocabulary.values)$"
   );
 $else$
   return new ArrayList<String>(0);
-$endif$    
-\}  
+$endif$
+\}
 
+$endif$
+$if (member.hasPreferredUnits)$
+
+/**
+ * Gets the preferred units for - $member.commentString$
+ * @return the list of preferred units
+ */
+public List<Units> get$member.javaSafeTag$PreferredUnits() \{
+  return Arrays.asList(
+$trunc(member.preferredUnits): { units |
+    new Units("$units$"), }$
+    new Units("$last(member.preferredUnits)$"));
+\}
 $endif$ }$

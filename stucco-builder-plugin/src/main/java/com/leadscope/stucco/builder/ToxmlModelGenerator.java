@@ -229,9 +229,9 @@ public class ToxmlModelGenerator {
       elementIdCompositeMemberMap.put(childElementId, member);
                   
       if (childClass.isHasUnits()) {
-        Element prefUnitsElement = node.getFirstChildElement(Spec.PREFERRED_UNITS);
+        Element prefUnitsElement = childElement.getFirstChildElement(Spec.PREFERRED_UNITS);
         if (prefUnitsElement != null) {
-          Elements valueElements = node.getChildElements(Spec.VALUE);
+          Elements valueElements = prefUnitsElement.getChildElements(Spec.VALUE);
           for (int j = 0; j < valueElements.size(); j++) {
             String prefUnits = valueElements.get(j).getValue();
             composite.addPreferredUnit(childTag, prefUnits);

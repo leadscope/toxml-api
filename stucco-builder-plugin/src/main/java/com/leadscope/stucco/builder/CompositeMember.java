@@ -51,6 +51,10 @@ public class CompositeMember {
     return description;
   }
   
+  public boolean isHasPreferredUnits() {
+    return preferredUnits.size() > 0;
+  }
+  
   public void addPreferredUnits(String units) {
     preferredUnits.add(units);
   }
