@@ -13,7 +13,7 @@ import com.leadscope.stucco.model.CompoundRecord;
 
 public class LegacyDataTestCase extends TestCase {  
   public void testReading() throws Throwable {
-    File inputFile = new File("src/test/resources/fdagenetox-test.xml"); 
+    File inputFile = new File("src/test/resources/legacy-test.xml"); 
     ToxmlReader.parseList(
         inputFile, 
         CompoundRecord.class,
@@ -28,8 +28,8 @@ public class LegacyDataTestCase extends TestCase {
   public void testReadingAndWriting() throws Throwable {
     File outputDir = new File("target/test-result-files");
     outputDir.mkdirs();
-    File outputFile = new File(outputDir, "LegacyDataTestCase-fdagenetox.xml");
-    File inputFile = new File("src/test/resources/fdagenetox-test.xml"); 
+    File outputFile = new File(outputDir, "LegacyDataTestCase-output.xml");
+    File inputFile = new File("src/test/resources/legacy-test.xml"); 
     
     ToxmlWriter.write("Compounds", "Compound",
         new ToxmlFileSource<CompoundRecord>(inputFile, CompoundRecord.class), 

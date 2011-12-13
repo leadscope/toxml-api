@@ -6,21 +6,21 @@ package com.leadscope.stucco.io;
 
 import java.io.*;
 
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamWriter;
+import org.xmlpull.v1.XmlPullParserFactory;
+import org.xmlpull.v1.XmlSerializer;
 
 import com.leadscope.stucco.*;
 import com.leadscope.stucco.StringValue;
 import com.leadscope.stucco.util.StringUtil;
-
-//import com.sun.xml.internal.txw2.output.IndentingXMLStreamWriter;
 
 /**
  * Writes toxml objects to an xml stream. After constructing the writer, use the visit
  * methods to write objects to the stream. Be sure to call close() when finished writing.
  */
 public class ToxmlWriter implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants {
-  private XMLStreamWriter writer;
+  private Writer writer;
+  private XmlSerializer serializer;
+  private String rootTag;
     
   /**
    * Writes the obj to a string of containing the xml
@@ -31,9 +31,7 @@ public class ToxmlWriter implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
    */  
   public static String toString(String rootTag, ToxmlObject obj) throws Exception {
     StringWriter sw = new StringWriter();
-    ToxmlWriter writer = new ToxmlWriter(
-        rootTag,
-        XMLOutputFactory.newInstance().createXMLStreamWriter(sw));
+    ToxmlWriter writer = new ToxmlWriter(rootTag, sw);
     obj.accept(writer);
     writer.close();
     return sw.toString();
@@ -48,9 +46,7 @@ public class ToxmlWriter implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
    * @throws Exception if something goes awry
    */
   public static void write(String rootTag, ToxmlObject obj, OutputStream os) throws Exception {
-    ToxmlWriter writer = new ToxmlWriter(
-        rootTag,
-        XMLOutputFactory.newInstance().createXMLStreamWriter(os));
+    ToxmlWriter writer = new ToxmlWriter(rootTag, os);
     Exception exception = null;
     try {      
       obj.accept(writer);
@@ -122,21 +118,50 @@ public class ToxmlWriter implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
     }
   }
   
-  public ToxmlWriter(String rootTag, OutputStream os) throws Exception {
-    this(rootTag, XMLOutputFactory.newInstance().createXMLStreamWriter(os));
+  private static XmlSerializer createSerializer(Writer writer) throws Exception {
+    XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+    XmlSerializer serializer = factory.newSerializer();
+    serializer.setProperty("http://xmlpull.org/v1/doc/properties.html#serializer-indentation", "  ");
+    serializer.setProperty("http://xmlpull.org/v1/doc/properties.html#serializer-line-separator", "\n");
+    serializer.setOutput(writer);
+    return serializer;
   }
   
-  public ToxmlWriter(String rootTag, XMLStreamWriter writer) throws Exception {
-    // this.writer = new IndentingXMLStreamWriter(writer);
+  /**
+   * @param rootTag the root tag to start the document with
+   * @param os the stream to write to - note, this will be closed when close()
+   * is called on this object
+   * @throws Exception if something goes awry
+   */
+  public ToxmlWriter(String rootTag, OutputStream os) throws Exception {
+    this(rootTag, new OutputStreamWriter(os));
+  }
+  
+  /**
+   * @param rootTag the root tag to start the document with
+   * @param writer the writer to write to - note, this will be closed when close()
+   * is called on this object
+   * @throws Exception if something goes awry
+   */
+  public ToxmlWriter(String rootTag, Writer writer) throws Exception {
+    this.rootTag = rootTag;
     this.writer = writer;
-    this.writer.writeStartDocument("UTF-8", "1.0");
-    this.writer.writeStartElement(rootTag);
+    this.serializer = createSerializer(writer);
+    this.serializer.startDocument("UTF-8", Boolean.TRUE);
+    this.serializer.startTag(namespace, rootTag);
   }
 
+  /**
+   * Ends the document and closes the output stream
+   */
   public void close() throws Exception {
-    writer.writeEndElement();
-    writer.writeEndDocument();
-    writer.close();
+    try {
+      serializer.endTag(namespace, rootTag);
+      serializer.endDocument();
+    }
+    finally {
+      writer.close();
+    }
   }
   
   /**
@@ -145,9 +170,9 @@ public class ToxmlWriter implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
    * @param obj the object to serialize
    */
   public void write(String tag, ToxmlObject obj) throws Exception {
-    writer.writeStartElement(tag);
+    serializer.startTag(namespace, tag);
     obj.accept(this);
-    writer.writeEndElement();
+    serializer.endTag(namespace, tag);
   }
   
   public ToxmlObject visit(CompositeToxmlObject obj) throws Exception {
@@ -155,9 +180,9 @@ public class ToxmlWriter implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
     for (String tag : obj.getChildTags()) {
       ToxmlObject child = obj.getChild(tag);
       if (child != null && !child.isEmpty()) {
-        writer.writeStartElement(tag);
+        serializer.startTag(namespace, tag);
         child.accept(this);
-        writer.writeEndElement();
+        serializer.endTag(namespace, tag);
       }
     }
     return obj;
@@ -175,9 +200,9 @@ public class ToxmlWriter implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
     writeAbstractAttributes(obj);
     for (T child : obj.getValues()) {
       if (!child.isEmpty()) {
-        writer.writeStartElement(obj.getChildTag());
+        serializer.startTag(namespace, obj.getChildTag());
         child.accept(this);
-        writer.writeEndElement();
+        serializer.endTag(namespace, obj.getChildTag());
       }
     }
     return obj;    
@@ -191,7 +216,7 @@ public class ToxmlWriter implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
 
   public ToxmlObject visit(CDataValue obj) throws Exception {
     writeAbstractAttributes(obj);
-    writer.writeCData(obj.getValue());
+    serializer.cdsect(obj.getValue());
     return obj;
   }
 
@@ -242,14 +267,14 @@ public class ToxmlWriter implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
     if (obj.isRange()) {
       if (Float.isInfinite(obj.getLowValue()) &&
           Float.isInfinite(obj.getHighValue())) {
-        writer.writeAttribute(QUALIFIER_ATTRIBUTE, UNKNOWN_ATTRIBUTE);
+        serializer.attribute(namespace, QUALIFIER_ATTRIBUTE, UNKNOWN_ATTRIBUTE);
       }
       else if (Float.isInfinite(obj.getLowValue())) {
-        writer.writeAttribute(QUALIFIER_ATTRIBUTE, LESS_ATTRIBUTE);
+        serializer.attribute(namespace, QUALIFIER_ATTRIBUTE, LESS_ATTRIBUTE);
         write(StringUtil.formatProperty(obj.getHighValue()));
       }
       else if (Float.isInfinite(obj.getHighValue())) {
-        writer.writeAttribute("qualifer", GREATER_ATTRIBUTE);
+        serializer.attribute(namespace, QUALIFIER_ATTRIBUTE, GREATER_ATTRIBUTE);
         write(StringUtil.formatProperty(obj.getLowValue()));
       }
       else {
@@ -271,7 +296,7 @@ public class ToxmlWriter implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
 
   public ToxmlObject visit(TypedValue obj) throws Exception {
     writeAbstractAttributes(obj);
-    writer.writeAttribute(TYPE_ATTRIBUTE, obj.getType());
+    serializer.attribute(namespace, TYPE_ATTRIBUTE, obj.getType());
     write(obj.getValue());
     return obj;
   }
@@ -283,27 +308,27 @@ public class ToxmlWriter implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
   }
   
   private void write(String value) throws Exception {
-    writer.writeCharacters(value);
+    serializer.text(value);
   }
   
   private void writeText(String element, String value) throws Exception {
-    writer.writeStartElement(element);
-    writer.writeCharacters(value);
-    writer.writeEndElement();
+    serializer.startTag(namespace, element);
+    serializer.text(value);
+    serializer.endTag(namespace, element);
   }
   
   private void writeAbstractAttributes(ToxmlObject obj) throws Exception {
     String sourceList = StringUtil.join(obj.getSources(), ",");
     if (sourceList.trim().length() > 0) {
-      writer.writeAttribute(SOURCES_ATTRIBUTE, sourceList);
+      serializer.attribute(namespace, SOURCES_ATTRIBUTE, sourceList);
     }
     DiffStatus diffStatus = obj.getDiffStatus();
     if (diffStatus != null) {
-      writer.writeAttribute(DIFF_ATTRIBUTE, diffStatus.toString());
+      serializer.attribute(namespace, DIFF_ATTRIBUTE, diffStatus.toString());
     }
     String conflictValue = obj.getOriginalConflictValue();
     if (conflictValue != null) {
-      writer.writeAttribute(ORIGINAL_CONFLICT_ATTRIBUTE, conflictValue);
+      serializer.attribute(namespace, ORIGINAL_CONFLICT_ATTRIBUTE, conflictValue);
     }
   }
 }
