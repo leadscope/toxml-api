@@ -1,58 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>com.leadscope</groupId>
-    <artifactId>toxml-api</artifactId>
-    <packaging>pom</packaging>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>ToxML API</name>
-    <description>ToxML API is an implementation the ToxML specification.</description>
-    <developers>
-        <developer>
-            <name>Scott Miller</name>
-            <organization>Leadscope, Inc.</organization>
-            <organizationUrl>http://leadscope.com</organizationUrl>
-            <url>https://github.com/smiller-leadscope</url>
-        </developer>
-    </developers>
-    <organization>
-        <name>Leadscope, Inc.</name>
-        <url>http://leadscope.com</url>
-    </organization>
-    <inceptionYear>2011</inceptionYear>
-    <licenses>
-        <license>
-            <name>GNU GPL v3</name>
-            <url>http://www.gnu.org/licenses/gpl.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-    <!-- <url>http://github.com/smiller-leadscope/toxml-api</url> -->
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.leadscope</groupId>
+  <artifactId>toxml-api</artifactId>
+  <packaging>pom</packaging>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>ToxML API</name>
+  <description>ToxML API is an implementation the ToxML specification.</description>
+  <developers>
+    <developer>
+      <name>Scott Miller</name>
+      <organization>Leadscope, Inc.</organization>
+      <organizationUrl>http://leadscope.com</organizationUrl>
+      <url>https://github.com/smiller-leadscope</url>
+    </developer>
+  </developers>
+  <organization>
+    <name>Leadscope, Inc.</name>
+    <url>http://leadscope.com</url>
+  </organization>
+  <inceptionYear>2011</inceptionYear>
+  <licenses>
+    <license>
+      <name>GNU GPL v3</name>
+      <url>http://www.gnu.org/licenses/gpl.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <!-- <url>http://github.com/smiller-leadscope/toxml-api</url> -->
 
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>appassembler-maven-plugin</artifactId>
+        <version>1.1.1</version>
+        <configuration>
+          <programs />
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <fork>true</fork>
+          <meminitial>128m</meminitial>
+          <maxmem>512m</maxmem>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
-    <modules>
-        <module>stucco</module>
-        <module>stucco-builder-plugin</module>
-    </modules>
+  <modules>
+    <module>stucco</module>
+    <module>stucco-builder-plugin</module>
+  </modules>
 </project>
