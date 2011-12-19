@@ -58,6 +58,7 @@ public class ToxmlFileSource<T extends ToxmlObject> implements Iterable<T> {
   public class ToxmlIterator implements Iterator<T> {
     private XMLStreamReader reader;
     private T nextObj;
+    private boolean closed;
     
     public ToxmlIterator() throws Exception {
       reader = XMLInputFactory.newInstance().createXMLStreamReader(new FileInputStream(file));
@@ -86,10 +87,15 @@ public class ToxmlFileSource<T extends ToxmlObject> implements Iterable<T> {
     }    
     
     /**
-     * Call if the source needs to be closed before the iterator completes
+     * Call if the source needs to be closed before the iterator completes. Not
+     * necessary to call if the iterator is used to completion. Idempotent in any
+     * case
      */
     public void close() throws Exception {
-      reader.close();
+      if (!closed) {
+        reader.close();
+        closed = true;
+      }
     }
     
     private void parseNextObj() {
@@ -100,7 +106,7 @@ public class ToxmlFileSource<T extends ToxmlObject> implements Iterable<T> {
         }
         else {
           nextObj = null;
-          reader.close();
+          close();
         }
       }
       catch (Throwable t) {

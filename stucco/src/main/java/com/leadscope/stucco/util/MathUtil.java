@@ -17,60 +17,26 @@
  */
 package com.leadscope.stucco.util;
 
-import java.math.BigDecimal;
-
 /**
  * Some utility methods to round and commute in toxml's legacy way
  */
 public class MathUtil {
-  /** for converting natural log to log base 10 */
-  final static double NATURAL_LOG_OF_10 = (double)Math.log(10.0);
-
-  
   /**
-   * Logarithm base 10.
-   *
-   * @param f value to compute logarithm of
-   * @return logarithm base 10
-   */
-  public static double log10(double f) {
-    return Math.log(f) / NATURAL_LOG_OF_10;
-  }
-
-  /**
-   * Rounds a value from a logarithmic scale to a specified significant number
-   * of digits.  Note that value and return are double.  Java double types have
-   * round bugs.
-   *
-   * @param value value to round
-   * @param significantDigits number of digits to preserve
+   * Rounds the value to the given significant figures
+   * @param num the value to round
+   * @param n the number of significant figures
    * @return the rounded value
    */
-  public static double logarithmicRound(double value, int significantDigits) {
-    if (Double.isInfinite(value)) {
-      return value;
+  public static double logarithmicRound(double num, int n) {
+    if (num == 0) {
+      return 0;
     }
 
-    if (Double.isNaN(value)) {
-      return Double.NaN;
-    }
+    final double d = Math.ceil(Math.log10(num < 0 ? -num: num));
+    final int power = n - (int) d;
 
-    double log10 = log10(Math.abs(value));
-    int digitsFromDecimalPoint = (int)Math.abs(log10);
-
-    int scale = significantDigits - digitsFromDecimalPoint - 1;
-    if (value < 1f && value > -1f)  scale = significantDigits + digitsFromDecimalPoint;
-    if (scale >= 0) {
-      BigDecimal result = new BigDecimal((double)value).setScale(scale, BigDecimal.ROUND_HALF_UP);
-      return result.doubleValue();
-    }
-    else {
-      double roundingFactor = (double)Math.pow(10,scale);
-      if (roundingFactor == 0.0f) roundingFactor = 1.0f;
-      long lvalue = (long)(value * roundingFactor + 0.5f);
-      BigDecimal result = new BigDecimal((double)lvalue);
-      result = result.divide(new BigDecimal(roundingFactor),BigDecimal.ROUND_HALF_UP);
-      return result.doubleValue();
-    }
+    final double magnitude = Math.pow(10, power);
+    final long shifted = Math.round(num*magnitude);
+    return shifted/magnitude;
   }
 }

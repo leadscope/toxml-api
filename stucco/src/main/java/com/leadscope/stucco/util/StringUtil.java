@@ -17,7 +17,6 @@
  */
 package com.leadscope.stucco.util;
 
-import java.text.DecimalFormat;
 import java.util.List;
 
 /**
@@ -59,38 +58,18 @@ public class StringUtil {
   }  
   
   /**
-   * Formats the property value in an eye friendly way; uses 3 significant figures
+   * @param number the value to format
+   * @return a formatted string
    */
-  public static String formatEyeFriendlyProperty(double propValue) {
-    String formatterString;
-    if (propValue == 0) {
-      return "0";
-    }
-
-    double absValue = (propValue < 0) ? propValue * -1 : propValue;
-
-    if ((absValue < 0.01) || (absValue >= 10000)) {
-      formatterString = ".###E0";
-    } else if (absValue < 0.1) {
-      formatterString = ".0000";
-    } else if (absValue < 1) {
-      formatterString = ".000";
-    } else if (absValue < 10) {
-      formatterString = "0.00";
-    } else if (absValue < 100) {
-      formatterString = "00.0";
-    } else {
-      formatterString = "#000";
-    }
-
-    DecimalFormat formatter = new DecimalFormat(formatterString);
-    return formatter.format(propValue);
-  }
-
   public static String formatProperty(Number number) {
     return formatProperty(number, MAX_SIGNIFICANT_FIGURES);
   }
   
+  /**
+   * @param number the value to format
+   * @param sigfigs the number of significant digits
+   * @return a formatted string
+   */
   public static String formatProperty(Number number, int sigfigs) {
     if(number == null) return NO_VALUE_STRING;
     return formatProperty(number.doubleValue(), sigfigs);
@@ -115,29 +94,41 @@ public class StringUtil {
    * the double value.
    * @return a formatted string
    */
-  public static String formatProperty(double propValue, int sigfigs){
-
-    if(propValue == Double.NEGATIVE_INFINITY) return "<<";
-
-    if(propValue == Double.POSITIVE_INFINITY) return ">>";
-
-    if(Double.isNaN(propValue)) return "NaN";
-
+  public static String formatProperty(double propValue, int sigfigs) {
+    if (Double.isInfinite(propValue) || Double.isNaN(propValue)) { 
+      return String.valueOf(propValue);
+    }
+    
     if (sigfigs != UNLIMITED_SIGNIFICANT_FIGURES) {
-        double roundedValue = MathUtil.logarithmicRound(propValue,sigfigs);
-        return (""+ roundedValue);
+      double roundedValue = MathUtil.logarithmicRound(propValue,sigfigs);
+      double actualFigures = Math.log10(roundedValue) + 1; 
+      if (actualFigures >= sigfigs && 
+          roundedValue <= Long.MAX_VALUE &&
+          roundedValue >= Long.MIN_VALUE) {
+        return String.valueOf((long)roundedValue);
+      }
+      else {
+        return String.valueOf(roundedValue);
+      }
     } else {
-        return ("" + propValue);
+      return String.valueOf(propValue);
     }
   }
 
-  // Return a formatted string value for the property
+  /**
+   * @param propValue value to format
+   * @return a formatted string value for the property
+   */
   public static String formatProperty(Double propValue){
     if(propValue == null) return NO_VALUE_STRING;
     return formatProperty(propValue.doubleValue());
   }
 
-  // Return a formatted string value for the property
+  /**
+   * @param propValue value to format
+   * @param sigfigs the number of significant digits
+   * @return a formatted string value for the property
+   */
   public static String formatProperty(Double propValue, int sigfigs){
     if(propValue == null) return NO_VALUE_STRING;
     return formatProperty(propValue.doubleValue(), sigfigs);
