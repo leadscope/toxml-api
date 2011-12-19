@@ -5,12 +5,12 @@ For the upcoming update of the ToxML specification, the ToxML foundation has mov
 towards opening the standard, and allowing external contributions. To this end
 a community site has been created that allows the viewing and modification of
 the working draft of the specification (http://toxml.lhasalimited.org/working-draft).
-As part of this site, the specification can be downloaded in a concise XML format 
+As part of this site, the specification can be downloaded in a concise XML format
 (toxml_specification.xml). This project takes that specification and generates
 a Java API that provides a data model, a parser, and a serializer.
 
-There are two parts to the project, the main stucco module and the 
-stucco-builder-plugin module, which is used to generate the concrete model objects 
+There are two parts to the project, the main stucco module and the
+stucco-builder-plugin module, which is used to generate the concrete model objects
 from the current specification.
 
 Installation
@@ -20,6 +20,14 @@ To create API jar file:
   mvn install
 
 The jar file will available be at: stucco/target/stucco-<version>.jar
+
+To create the ToxML validation app:
+
+  mvn package appassembler:assemble
+
+The app directory will be available at: target/toxml-api-<version>. To run the ToxML validator:
+
+  target/toxml-api-<version>/bin/toxml_validator <input toxml file>
 
 
 Using the API
@@ -46,12 +54,15 @@ To parse ToxML documents, use the ToxmlReader class, e.g.:
 
 To write a ToxML document, use the ToxmlWriter class, e.g.:
 
-    import com.leadscope.stucco.io.ToxmlFileSource
     import com.leadscope.stucco.io.ToxmlWriter
+    import com.leadscope.stucco.model.CompoundRecord
     ...
 
+    Compound cr = new CompoundRecord();
+    cr.getIds().add(new TypedValue("cas", "123-45-5"));
+
     ToxmlWriter.write("Compounds", "Compound",
-        new ToxmlFileSource<CompoundRecord>(inputFile, CompoundRecord.class),
+        Arrays.asList(cr),
         outputFile);
 
 

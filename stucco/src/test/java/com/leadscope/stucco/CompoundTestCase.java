@@ -10,6 +10,7 @@ import com.leadscope.stucco.model.Datum;
 public class CompoundTestCase extends TestCase {
   public void testCompound() throws Throwable {
     CompoundRecord cr = new CompoundRecord();
+    cr.getIds().addChild(new TypedValue("cas", "123-45-5"));
     Datum datum = cr.getDatasets().addNew();
     datum.setNameValue("Foo");
     datum.setValueValue(32.1f);

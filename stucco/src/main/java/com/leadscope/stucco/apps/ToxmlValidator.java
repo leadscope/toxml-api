@@ -16,7 +16,7 @@ import com.leadscope.stucco.model.CompoundRecord;
  */
 public class ToxmlValidator {
   private static void usageExit() {
-    System.out.println("usage: ToxmlValidator <input file>");
+    System.out.println("usage: toxml_validator <input file>");
     System.exit(1);
   }
 
