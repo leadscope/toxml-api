@@ -100,7 +100,7 @@ public class StringUtil {
     }
     
     if (sigfigs != UNLIMITED_SIGNIFICANT_FIGURES) {
-      double roundedValue = MathUtil.logarithmicRound(propValue,sigfigs);
+      double roundedValue = MathUtil.base10SignificantFiguresRound(propValue,sigfigs);
       double actualFigures = Math.log10(roundedValue) + 1; 
       if (actualFigures >= sigfigs && 
           roundedValue <= Long.MAX_VALUE &&

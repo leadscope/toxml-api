@@ -304,11 +304,11 @@ public class InexactValue extends AbstractPrimitiveToxmlObject
   public InexactValue round(int sigFigs) {
     if (isRange()) {
       return new InexactValue(
-          (float)MathUtil.logarithmicRound(lowValue, sigFigs),
-          (float)MathUtil.logarithmicRound(highValue, sigFigs));
+          (float)MathUtil.base10SignificantFiguresRound(lowValue, sigFigs),
+          (float)MathUtil.base10SignificantFiguresRound(highValue, sigFigs));
     }
     else {
-      return new InexactValue((float)MathUtil.logarithmicRound(floatValue, sigFigs));
+      return new InexactValue((float)MathUtil.base10SignificantFiguresRound(floatValue, sigFigs));
     }
   }
 

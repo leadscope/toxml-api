@@ -27,7 +27,7 @@ public class MathUtil {
    * @param n the number of significant figures
    * @return the rounded value
    */
-  public static double logarithmicRound(double num, int n) {
+  public static double base10SignificantFiguresRound(double num, int n) {
     if (num == 0) {
       return 0;
     }
