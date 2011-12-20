@@ -19,7 +19,7 @@ package com.leadscope.stucco;
 
 import junit.framework.TestCase;
 
-import com.leadscope.stucco.io.ToxmlReader;
+import com.leadscope.stucco.io.ToxmlParser;
 import com.leadscope.stucco.io.ToxmlWriter;
 import com.leadscope.stucco.model.CompoundRecord;
 import com.leadscope.stucco.model.Datum;
@@ -41,7 +41,7 @@ public class CompoundTestCase extends TestCase {
     String xml = ToxmlWriter.toString("Compound", cr);
     System.out.println(xml);
     
-    CompoundRecord cr2 = ToxmlReader.parse(xml, CompoundRecord.class);
+    CompoundRecord cr2 = ToxmlParser.parse(xml, CompoundRecord.class);
     
     assertEquals("Should be able to round trip data name", 
         cr.getDatasets().get(0).getName(),

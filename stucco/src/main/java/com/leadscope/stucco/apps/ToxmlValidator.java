@@ -20,7 +20,7 @@ package com.leadscope.stucco.apps;
 import java.io.File;
 
 import com.leadscope.stucco.io.ToxmlHandler;
-import com.leadscope.stucco.io.ToxmlReader;
+import com.leadscope.stucco.io.ToxmlParser;
 import com.leadscope.stucco.model.CompoundRecord;
 
 /**
@@ -57,7 +57,7 @@ public class ToxmlValidator {
     
     File file = new File(args[0]);
     try {
-      ToxmlReader.parseList(file, CompoundRecord.class, new Handler());
+      ToxmlParser.parseList(file, CompoundRecord.class, new Handler());
     }
     catch (Exception e) {
       e.printStackTrace();

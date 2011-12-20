@@ -17,190 +17,51 @@
  */
 package com.leadscope.stucco.io;
 
-import java.io.*;
 import java.util.*;
 
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 
 import com.leadscope.stucco.*;
 import com.leadscope.stucco.StringValue;
 
 /**
- * Parses an arbitrary toxml object from an xml source
+ * Parses an arbitrary toxml object from an xml source. To use, construct an
+ * XMLStreamReader, process the initial tag events to get to the START_ELEMENT event
+ * of the toxml object you wish to parse. Pass a new instance of that object to
+ * the visit method on this reader. This reader will recursively parse all child
+ * objects contained within.
+ * 
+ * @see ToxmlParser for simplified methods and specific use cases
  */
-public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants {  
+public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants {
   private XMLStreamReader reader;
-
-  /**
-   * Parses a list of toxml objects - expects a root node with the child objects appearing
-   * as elements underneath
-   * @param file the xml file to parse
-   * @param toxmlClass the class of child objects to parse
-   * @param handler the handler to process the objects
-   */
-  public static <T extends ToxmlObject> void parseList(
-      File file, 
-      Class<T> toxmlClass, 
-      ToxmlHandler<T> handler) throws Exception {
-    FileInputStream fis = new FileInputStream(file);
-    Exception exception = null;
-    try {
-      parseList(createReader(fis), toxmlClass, handler);
-    }
-    finally {
-      try { fis.close(); } catch (Exception e) { 
-        if (exception != null) {
-          throw exception;
-        }
-        else {
-          throw e;
-        }
-      }
-    }
-  }
-
-  /**
-   * Parses a list of toxml objects - expects a root node with the child objects appearing
-   * as elements underneath
-   * @param xml the xml string to parse
-   * @param toxmlClass the class of child objects to parse
-   * @param handler the handler to process the objects
-   */
-  public static <T extends ToxmlObject> void parseList(
-      String xml, 
-      Class<T> toxmlClass, 
-      ToxmlHandler<T> handler) throws Exception {
-    parseList(createReader(xml), toxmlClass, handler);
-  }
-
-  /**
-   * Parses a list of toxml objects - expects a root node with the child objects appearing
-   * as elements underneath
-   * @param input the input stream to read from
-   * @param toxmlClass the class of child objects to parse
-   * @param handler the handler to process the objects
-   */
-  public static <T extends ToxmlObject> void parseList(
-      InputStream input, 
-      Class<T> toxmlClass, 
-      ToxmlHandler<T> handler) throws Exception {
-    parseList(createReader(input), toxmlClass, handler);
-  }
-
-  /**
-   * Parses a list of toxml objects - expects a root node with the child objects appearing
-   * as elements underneath
-   * @param reader the xml reader to parse from
-   * @param toxmlClass the class of child objects to parse
-   * @param handler the handler to process the objects
-   */
-  public static <T extends ToxmlObject> void parseList(
-      XMLStreamReader reader, 
-      Class<T> toxmlClass, 
-      ToxmlHandler<T> handler) throws Exception {
-    reader.nextTag();
-    
-    int eventType = reader.nextTag();
-    while (eventType != XMLStreamReader.END_ELEMENT) {
-      if (eventType == XMLStreamReader.START_ELEMENT) {
-        try {
-          String tagName = reader.getLocalName();
-          T obj = parseInternal(reader, toxmlClass);
-          handler.handle(obj);
-          if (reader.getEventType() != XMLStreamReader.END_ELEMENT) {
-            throw new RuntimeException("Not at end element after parsing: " + obj.getClass().getName());
-          }
-          else if (!tagName.equals(reader.getLocalName())) {
-            throw new RuntimeException("Not at matching end element after parsing: " + obj.getClass().getName() + 
-                  " got: " + reader.getLocalName() + "  expected: " + tagName);
-          }
-        }
-        catch (ToxmlReaderException tre) {
-          throw tre;
-        }
-        catch (Throwable t) {
-          throw new ToxmlReaderException(reader.getLocation().getLineNumber(), t);                          
-        }
-      }
-      
-      eventType = reader.nextTag();
-    }
-  }
+  private List<ToxmlErrorHandler> errorHandlers = new ArrayList<ToxmlErrorHandler>();
+  private List<String> tagStack = new ArrayList<String>();
+  private List<ToxmlObjectParent> parentStack = new ArrayList<ToxmlObjectParent>();
   
   /**
-   * Parses the given class from the source xml string
-   * @param xml the xml string to parse
-   * @param toxmlClass the class of the object to parse
+   * Constructs a reader which will begin parsing as new instances of toxml objects
+   * are visited.
+   * @param reader the reader from which the toxml objects will be parsed - this
+   * reader should be at the START_ELEMENT event of the object being visited
    */
-  public static <T extends ToxmlObject> T parse(String xml, Class<T> toxmlClass) throws Exception {
-    return parse(createReader(xml), 
-        toxmlClass);    
-  }
-
-  /**
-   * Parses the given class from the source reader
-   * @param input the input to read from
-   * @param toxmlClass the class of the object to parse
-   */
-  public static <T extends ToxmlObject> T parse(InputStream input, Class<T> toxmlClass) throws Exception {
-    return parse(XMLInputFactory.newInstance().createXMLStreamReader(input), toxmlClass);    
-  }
-
-  /**
-   * Parses the given class from the source reader
-   * @param reader the reader to read from
-   * @param toxmlClass the class of the object to parse
-   */
-  public static <T extends ToxmlObject> T parse(XMLStreamReader reader, Class<T> toxmlClass) throws Exception {
-    reader.nextTag();
-    return parseInternal(reader, toxmlClass);    
-  }
-
-  /**
-   * Parses the given class of object from the stream
-   * @param reader the xml stream just after the start tag of the element
-   * @param toxmlClass the class of object to parse
-   */
-  public static <T extends ToxmlObject> T parseInternal(
-      XMLStreamReader reader, 
-      Class<T> toxmlClass) throws Exception {
-    ToxmlReader toxReader = new ToxmlReader(reader);
-    T obj = toxmlClass.newInstance();
-    obj.accept(toxReader);
-    return obj;
-  }
-  
-  /**
-   * Creates a reader with the appropriate parsing properties set
-   * @param xml the string of xml
-   * @return the reader for the xml string
-   */
-  public static XMLStreamReader createReader(String xml) throws Exception {
-    XMLInputFactory factory = XMLInputFactory.newInstance();
-    XMLStreamReader reader = factory.createXMLStreamReader(new StringReader(xml));
-    return reader;
-  }
-
-  /**
-   * Creates a reader with the appropriate parsing properties set
-   * @param input the input stream
-   * @return the reader for the xml string
-   */
-  public static XMLStreamReader createReader(InputStream input) throws Exception {
-    XMLInputFactory factory = XMLInputFactory.newInstance();
-    XMLStreamReader reader = factory.createXMLStreamReader(input);
-    return reader;
-  }
-
   public ToxmlReader(XMLStreamReader reader) {
     this.reader = reader;
+    errorHandlers.add(new FinalErrorHandler());
   }
 
+  /**
+   * Adds an error handler. The handlers are called in reverse order of addition
+   * @param handler the handler to add
+   */
+  public void addErrorHandler(ToxmlErrorHandler handler) {
+    errorHandlers.add(handler);
+  }
+  
   public CompositeToxmlObject visit(CompositeToxmlObject obj) throws Exception {
     String expectedEndTag = reader.getLocalName();
     parseAbstractAttributes(obj);
-       
+        
     Set<String> seenTags = new HashSet<String>();
     int eventType = reader.nextTag();
     while (eventType != XMLStreamReader.END_ELEMENT) {
@@ -219,39 +80,11 @@ public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
           
           Class<? extends ToxmlObject> childClass = obj.getChildClass(tagName);
           if (childClass != null) {
-            try {                                    
-              ToxmlObject childObj = childClass.newInstance();
-              childObj.accept(this);
-              obj.setChild(tagName, childObj);
-              if (reader.getEventType() != XMLStreamReader.END_ELEMENT) {
-                throw new RuntimeException("Not at end element after parsing: " + obj.getClass().getName());
-              }
-              else if (!tagName.equals(reader.getLocalName())) {
-                throw new RuntimeException("Not at matching end element after parsing: " + obj.getClass().getName() + 
-                      " got: " + reader.getLocalName() + "  expected: " + tagName);
-              }
-            } 
-            catch (InstantiationException ie) {
-              throw new RuntimeException("Could not instantiate toxml object: " + 
-                                         childClass.getName(),
-                                         ie);
-            }
-            catch (IllegalAccessException iae) {
-              throw new RuntimeException("Could not access toxml class: " + 
-                                         childClass.getName(),
-                                         iae);
-            }
-            catch (ToxmlReaderException tre) {
-              throw tre;
-            }
-            catch (Throwable t) {
-              throw new ToxmlReaderException(reader.getLocation().getLineNumber(), t);                
-            }
+            ToxmlObject childObj = parseChild(obj, tagName, childClass);
+            obj.setChild(tagName, childObj);
           }
           else {
-            throw new ToxmlReaderException(reader.getLocation().getLineNumber(),
-                "Unexpected element: " + tagName + " in class: " + 
-                obj.getClass().getName());
+            handleUnexpectedTag(obj, tagName);
           }
         }
       }      
@@ -283,38 +116,11 @@ public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
         
         if (tagName.equals(obj.getChildTag())) {
           Class<T> childClass = obj.getChildClass();
-          try {
-            T childObj = childClass.newInstance();
-            childObj.accept(this);
-            obj.addChild(childObj);
-            if (reader.getEventType() != XMLStreamReader.END_ELEMENT) {
-              throw new RuntimeException("Not at end element after parsing: " + obj.getClass().getName());
-            }
-            else if (!tagName.equals(reader.getLocalName())) {
-              throw new RuntimeException("Not at matching end element after parsing: " + obj.getClass().getName() + 
-                    " got: " + reader.getLocalName() + "  expected: " + tagName);
-            }
-          }
-          catch (InstantiationException ie) {
-            throw new RuntimeException("Could not instantiate toxml object: " +
-                                       childClass.getName(),
-                                       ie);
-          }
-          catch (IllegalAccessException iae) {
-            throw new RuntimeException("Could not access toxml class: " +
-                                       childClass.getName(),
-                                       iae);
-          }
-          catch (ToxmlReaderException tre) {
-            throw tre;
-          }
-          catch (Throwable t) {
-            throw new ToxmlReaderException(reader.getLocation().getLineNumber(), t);                
-          }
+          T childObj = parseChild(obj, tagName, childClass);
+          obj.addChild(childObj);
         }
         else {
-          throw new ToxmlReaderException(reader.getLocation().getLineNumber(),
-                  "Unexpected element: " + tagName + " by class: " + obj.getClass().getName());
+          handleUnexpectedTag(obj, tagName);
         }
       }
       
@@ -326,6 +132,41 @@ public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
     return obj;    
   }
     
+  private <T extends ToxmlObject> T parseChild(ToxmlObjectParent parent, String tagName, Class<T> childClass) throws Exception {
+    pushChildTag(parent, tagName);
+    try {                                    
+      T childObj = childClass.newInstance();
+      childObj.accept(this);      
+      if (reader.getEventType() != XMLStreamReader.END_ELEMENT) {
+        throw new RuntimeException("Not at end element after parsing: " + parent.getClass().getName());
+      }
+      else if (!tagName.equals(reader.getLocalName())) {
+        throw new RuntimeException("Not at matching end element after parsing: " + parent.getClass().getName() + 
+              " got: " + reader.getLocalName() + "  expected: " + tagName);
+      }
+      return childObj;
+    } 
+    catch (InstantiationException ie) {
+      throw new RuntimeException("Could not instantiate toxml object: " + 
+                                 childClass.getName(),
+                                 ie);
+    }
+    catch (IllegalAccessException iae) {
+      throw new RuntimeException("Could not access toxml class: " + 
+                                 childClass.getName(),
+                                 iae);
+    }
+    catch (ToxmlReaderException tre) {
+      throw tre;
+    }
+    catch (Throwable t) {
+      throw new ToxmlReaderException(reader.getLocation().getLineNumber(), t);                
+    }
+    finally {
+      popChildTag();
+    }
+  }
+  
   private void checkEndTag(String expectedEndTag) {
     if (reader.getEventType() != XMLStreamReader.END_ELEMENT) {
       throw new ToxmlReaderException(
@@ -340,63 +181,130 @@ public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
   }
   
   public ToxmlObject visit(StringValue obj) throws Exception {
-    parseAbstractAttributes(obj);    
-    obj.setValue(reader.getElementText());
+    parseAbstractAttributes(obj);
+    String text = reader.getElementText();
+    try {
+      obj.setValue(text);
+    }
+    catch (Exception e) {
+      handleValueException(getTopParent(), getTopTag(), obj, text, e);
+    }
     return obj;
   }
 
   public ToxmlObject visit(CDataValue obj) throws Exception {
-    parseAbstractAttributes(obj);    
-    obj.setValue(reader.getElementText());
+    parseAbstractAttributes(obj);
+    String text = reader.getElementText();
+    try {
+      obj.setValue(text);
+    }
+    catch (Exception e) {
+      handleValueException(getTopParent(), getTopTag(), obj, text, e);
+    }
     return obj;
   }
 
   public ToxmlObject visit(AbstractToxmlEnumeratedType obj) throws Exception {
-    parseAbstractAttributes(obj);    
-    obj.setValue(reader.getElementText());
+    parseAbstractAttributes(obj);
+    String text = reader.getElementText();
+    try {
+      obj.setValue(text);
+    }
+    catch (Exception e) {
+      handleValueException(getTopParent(), getTopTag(), obj, text, e);
+    }
     return obj;
   }
   
   public ToxmlObject visit(BooleanValue obj) throws Exception {
     parseAbstractAttributes(obj);
-    obj.setValue(reader.getElementText());
+    String text = reader.getElementText();
+    try {
+      obj.setValue(text);
+    }
+    catch (Exception e) {
+      handleValueException(getTopParent(), getTopTag(), obj, text, e);
+    }
     return obj;
   }
 
   public ToxmlObject visit(DateValue obj) throws Exception {
     parseAbstractAttributes(obj);
-    obj.setValue(reader.getElementText());
+    String text = reader.getElementText();
+    try {
+      obj.setValue(text);
+    }
+    catch (Exception e) {
+      handleValueException(getTopParent(), getTopTag(), obj, text, e);
+    }
     return obj;
   }
 
   public ToxmlObject visit(FloatValue obj) throws Exception {
     parseAbstractAttributes(obj);
-    obj.setValue(reader.getElementText());
+    String text = reader.getElementText();
+    try {
+      obj.setValue(text);
+    }
+    catch (Exception e) {
+      handleValueException(getTopParent(), getTopTag(), obj, text, e);
+    }
     return obj;
   }
 
   public ToxmlObject visit(IntegerValue obj) throws Exception {
     parseAbstractAttributes(obj);
-    obj.setValue(reader.getElementText());
-    return obj;
+    String text = reader.getElementText();
+    try {
+      obj.setValue(text);
+    }
+    catch (Exception e) {
+      handleValueException(getTopParent(), getTopTag(), obj, text, e);
+    }
+    return obj;    
   }
 
   public ToxmlObject visit(IntegerArray obj) throws Exception {
     parseAbstractAttributes(obj);
-    obj.setValue(reader.getElementText());
+    String text = reader.getElementText();
+    try {
+      obj.setValue(text);
+    }
+    catch (Exception e) {
+      handleValueException(getTopParent(), getTopTag(), obj, text, e);
+    }
     return obj;
   }
   
   public ToxmlObject visit(Units obj) throws Exception {
     parseAbstractAttributes(obj);
-    obj.setValue(reader.getElementText());
+    String text = reader.getElementText();
+    try {
+      obj.setValue(text);
+    }
+    catch (Exception e) {
+      handleValueException(getTopParent(), getTopTag(), obj, text, e);
+    }
     return obj;
   }
   
   public ToxmlObject visit(TypedValue obj) throws Exception {
     parseAbstractAttributes(obj);
-    obj.setType(reader.getAttributeValue(null, TYPE_ATTRIBUTE));
-    obj.setValue(reader.getElementText());
+    String type = reader.getAttributeValue(null, TYPE_ATTRIBUTE);
+    try {
+      obj.setType(type);
+    }
+    catch (Exception e) {
+      handleValueException(getTopParent(), getTopTag(), obj, type, e);
+    }
+    
+    String text = reader.getElementText();
+    try {
+      obj.setValue(text);
+    }
+    catch (Exception e) {
+      handleValueException(getTopParent(), getTopTag(), obj, text, e);
+    }
     return obj;
   }
   
@@ -576,6 +484,65 @@ public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
     }
     else {
       return valueString;
+    }
+  }
+  
+  private void handleUnexpectedTag(CompositeToxmlObject parent, String tag) {
+    for (int i = errorHandlers.size()-1; i >= 0; i--) {
+      if (errorHandlers.get(i).unexpectedTag(reader, parent, tag)) {
+        return;
+      }
+    }
+  }
+  
+  private <T extends ToxmlObject> void handleUnexpectedTag(ToxmlObjectContainer<T> parent, String tag) {
+    for (int i = errorHandlers.size()-1; i >= 0; i--) {
+      if (errorHandlers.get(i).unexpectedTag(reader, parent, tag)) {
+        return;
+      }
+    }
+  }
+  
+  private void handleValueException(
+      ToxmlObjectParent parent, 
+      String tag,
+      PrimitiveToxmlObject obj,
+      String value,
+      Exception e) {
+    for (int i = errorHandlers.size()-1; i >= 0; i--) {
+      if (errorHandlers.get(i).valueException(reader, parent, tag, obj, value, e)) {
+        return;
+      }
+    }
+  }
+
+  private void pushChildTag(ToxmlObjectParent parent, String tag) {
+    parentStack.add(parent);
+    tagStack.add(tag);
+  }
+  
+  private void popChildTag() {
+    parentStack.remove(parentStack.size()-1);
+    tagStack.remove(tagStack.size()-1);
+  }
+
+  private String getTopTag() {
+    int count = tagStack.size(); 
+    if (count > 0) {  
+      return tagStack.get(count-1);
+    }
+    else {
+      return null;
+    }    
+  }
+  
+  private ToxmlObjectParent getTopParent() {
+    int count = parentStack.size();
+    if (count > 0) {
+      return parentStack.get(count-1);
+    }
+    else {
+      return null;
     }
   }
 }

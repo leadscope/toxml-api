@@ -37,13 +37,13 @@ root object is the CompoundRecord which will hold information about a single com
 (including any number of toxicity studies performed with that compound). However,
 any object in the model package can be created and used standalone.
 
-To parse ToxML documents, use the ToxmlReader class, e.g.:
+To parse ToxML documents, use the ToxmlParser class, e.g.:
 
-    import com.leadscope.stucco.io.ToxmlReader
+    import com.leadscope.stucco.io.ToxmlParser
     import com.leadscope.stucco.model.CompoundRecord
     ...
 
-    ToxmlReader.parseList(
+    ToxmlParser.parseList(
         new File("src/test/resources/fdagenetox-test.xml"),
         CompoundRecord.class,
         new ToxmlHandler<CompoundRecord>() {

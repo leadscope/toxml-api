@@ -24,7 +24,7 @@ import com.leadscope.stucco.testModel.TestCompound;
 
 public class ToxmlReaderTestCase extends TestCase {
   public void testSimple() throws Throwable {
-    TestCompound compound = ToxmlReader.parse("<Compound>" +
+    TestCompound compound = ToxmlParser.parse("<Compound>" +
        "<Datasets>" +
          "<Datum><Name>Foo</Name><Value>Bar</Value></Datum>" +
          "<Datum><Name>Boo</Name><Value>Urns</Value></Datum>" +
@@ -37,7 +37,7 @@ public class ToxmlReaderTestCase extends TestCase {
   }
   
   public void testWhitespace() throws Throwable {
-    TestCompound compound = ToxmlReader.parse("  <Compound>  " +
+    TestCompound compound = ToxmlParser.parse("  <Compound>  " +
        "<Datasets>    " +
          "<Datum> <Name>Foo</Name>  <Value> Bar</Value></Datum>" +
          "<Datum><Name>Boo</Name><Value>Urns  </Value></Datum>" +
@@ -52,7 +52,7 @@ public class ToxmlReaderTestCase extends TestCase {
   
   public void testBadTags() throws Throwable {
     try {
-      ToxmlReader.parse("  <Compound>  " +
+      ToxmlParser.parse("  <Compound>  " +
           "<Datasets>    " +
           "<Datum> <NameBad>Foo</NameBad>  <Value> Bar</Value></Datum>" +
           "<Datum><Name>Boo</Name><Value>Urns  </Value></Datum>" +
@@ -67,23 +67,23 @@ public class ToxmlReaderTestCase extends TestCase {
   }
     
   public void testInexactValue() throws Throwable {
-    InexactValue value = ToxmlReader.parse("<MyValue>1.3</MyValue>", InexactValue.class);    
+    InexactValue value = ToxmlParser.parse("<MyValue>1.3</MyValue>", InexactValue.class);    
     assertEquals(1.3, value.getFloatValue(), 0.001);
 
-    value = ToxmlReader.parse("<MyValue>  " +
+    value = ToxmlParser.parse("<MyValue>  " +
         "<LowValue>1.3</LowValue>    " +
         "<HighValue>1.8</HighValue></MyValue>", InexactValue.class);
     assertEquals(1.3, value.getLowValue(), 0.001);
     assertEquals(1.8, value.getHighValue(), 0.001);
     
-    value = ToxmlReader.parse("<MyValue qualifier='greater'>1.3</MyValue>", InexactValue.class);
+    value = ToxmlParser.parse("<MyValue qualifier='greater'>1.3</MyValue>", InexactValue.class);
     assertTrue("With qualifier should have range", value.isRange());
     assertEquals("With qualifier greater should have low value",
         1.3, value.getLowValue(), 0.001);
     assertEquals("With qualifier greater should have infinite high value",
         Float.POSITIVE_INFINITY, value.getHighValue());
     
-    value = ToxmlReader.parse("<MyValue qualifier='less'>   1.3 </MyValue>", InexactValue.class);
+    value = ToxmlParser.parse("<MyValue qualifier='less'>   1.3 </MyValue>", InexactValue.class);
     assertTrue("With qualifier should have range", value.isRange());
     assertEquals("With qualifier less should have high value",
         1.3, value.getHighValue(), 0.001);
@@ -92,7 +92,7 @@ public class ToxmlReaderTestCase extends TestCase {
   }
 
   public void testMixedInexactValue() throws Throwable {
-    TestCompound compound = ToxmlReader.parse("<Compound>" +
+    TestCompound compound = ToxmlParser.parse("<Compound>" +
         "<Datasets>" +
           "<Datum><Name>Foo</Name><Value>Bar</Value></Datum>" +
           "<Datum><Name>Boo</Name><Value>Urns</Value></Datum>" +
@@ -114,7 +114,7 @@ public class ToxmlReaderTestCase extends TestCase {
   }
   
   public void testQualifiedMixedInexactValue() throws Throwable {
-    TestCompound compound = ToxmlReader.parse("<Compound>" +
+    TestCompound compound = ToxmlParser.parse("<Compound>" +
         "<Datasets>" +
           "<Datum><Name>Foo</Name><Value>Bar</Value></Datum>" +
           "<Datum><Name>Boo</Name><Value>Urns</Value></Datum>" +
@@ -138,7 +138,7 @@ public class ToxmlReaderTestCase extends TestCase {
   
   public void testBadTypeExtraText() throws Throwable {
     try {
-      ToxmlReader.parse("<Compound>" +
+      ToxmlParser.parse("<Compound>" +
           "<Datasets>    " +
           "<Datum>PlainValue</Datum>" +
           "<Datum><Name>Boo</Name><Value>Urns  </Value></Datum>" +

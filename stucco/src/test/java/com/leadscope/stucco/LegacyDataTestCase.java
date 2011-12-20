@@ -27,7 +27,7 @@ import com.leadscope.stucco.model.CompoundRecord;
 public class LegacyDataTestCase extends TestCase {  
   public void testReading() throws Throwable {
     File inputFile = new File("src/test/resources/legacy-test.xml"); 
-    ToxmlReader.parseList(
+    ToxmlParser.parseList(
         inputFile, 
         CompoundRecord.class,
         new ToxmlHandler<CompoundRecord>() {
@@ -47,5 +47,21 @@ public class LegacyDataTestCase extends TestCase {
     ToxmlWriter.write("Compounds", "Compound",
         new ToxmlFileSource<CompoundRecord>(inputFile, CompoundRecord.class), 
         outputFile);
+  }
+  
+  public void testInvalid() throws Throwable {
+    File inputFile = new File("src/test/resources/invalid-test.xml");
+    try {
+      ToxmlParser.parseList(inputFile, CompoundRecord.class,
+        new ToxmlHandler<CompoundRecord>() {
+          public void handle(CompoundRecord obj) throws Exception {
+          }
+        });    
+      fail("Should have gotten an exception while parsing invalid xml file");
+    }
+    catch (Exception e) {
+      assertTrue("Should have found the not supposed to be here element", 
+          e.getMessage().startsWith("Unexpected element: ThisIsNotSupposedToBeHere"));
+    }
   }
 }

@@ -102,7 +102,7 @@ public class ToxmlFileSource<T extends ToxmlObject> implements Iterable<T> {
       try {
         int eventType = reader.nextTag(); // next element
         if (eventType == XMLStreamReader.START_ELEMENT) {
-          nextObj = ToxmlReader.parseInternal(reader, toxmlClass);
+          nextObj = ToxmlParser.parseInternal(reader, toxmlClass);
         }
         else {
           nextObj = null;

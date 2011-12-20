@@ -35,6 +35,8 @@ public class ToxmlPath {
         ToxmlObject.validTagPattern.matcher(tag).matches();
   }
   
+  private ToxmlPath() { }
+  
   /**
    * @param tags the list of tags that should be included in the path
    * @exception IllegalArgumentException if any of the tags are invalid
@@ -104,4 +106,22 @@ public class ToxmlPath {
   public String first() {
     return tags.get(0);
   }
+  
+  /**
+   * Creates a new path with the next tag appended
+   * @param tag the tag to append
+   * @return a new path with the appended tag
+   */
+  public ToxmlPath append(String tag) {
+    if (!validTag(tag)) {
+      throw new IllegalArgumentException(tag + " is an invalid toxml element tag");
+    }
+    
+    ToxmlPath newPath = new ToxmlPath();
+    newPath.tags = new ArrayList<String>(this.tags);
+    newPath.tags.add(tag);
+    newPath.path = this.path + DELIMITER + tag;
+    return newPath;
+  }
+
 }
