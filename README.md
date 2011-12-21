@@ -44,13 +44,28 @@ To parse ToxML documents, use the ToxmlParser class, e.g.:
     ...
 
     ToxmlParser.parseList(
-        new File("src/test/resources/fdagenetox-test.xml"),
+        new File("src/test/resources/legacy-test.xml"),
         CompoundRecord.class,
         new ToxmlHandler<CompoundRecord>() {
           public void handle(CompoundRecord obj) {
             System.out.println(obj.getIds().get(0).getValue());
           }
         });
+
+
+Or when using a file, you can parse imperatively with the ToxmlFileSource class, e.g.:
+
+    import com.leadscope.stucco.io.ToxmlFileSource
+    import com.leadscope.stucco.model.CompoundRecord
+    ...
+
+    File inputFile = new File("src/test/resources/legacy-test.xml");
+    Iterable<CompoundRecord> source =
+      new ToxmlFileSource<CompoundRecord>(inputFile, CompoundRecord.class);
+    for (CompoundRecord cr : source) {
+      System.out.println(cr.getIds().get(0).getValue());
+    }
+
 
 To write a ToxML document, use the ToxmlWriter class, e.g.:
 

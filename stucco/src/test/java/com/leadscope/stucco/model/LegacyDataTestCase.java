@@ -22,7 +22,6 @@ import java.io.File;
 import junit.framework.TestCase;
 
 import com.leadscope.stucco.io.*;
-import com.leadscope.stucco.model.CompoundRecord;
 
 public class LegacyDataTestCase extends TestCase {  
   public void testReading() throws Throwable {
@@ -36,6 +35,15 @@ public class LegacyDataTestCase extends TestCase {
           }
         });
     System.out.println();
+  }
+  
+  public void testIterableReading() throws Throwable {
+    File inputFile = new File("src/test/resources/legacy-test.xml");
+    Iterable<CompoundRecord> source =
+      new ToxmlFileSource<CompoundRecord>(inputFile, CompoundRecord.class);
+    for (CompoundRecord cr : source) {
+      System.out.println(cr.getIds().get(0).getValue());
+    }
   }
   
   public void testReadingAndWriting() throws Throwable {
