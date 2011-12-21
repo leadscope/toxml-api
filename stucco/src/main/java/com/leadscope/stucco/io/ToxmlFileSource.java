@@ -28,12 +28,31 @@ import javax.xml.stream.XMLStreamReader;
 import com.leadscope.stucco.ToxmlObject;
 
 /**
- * A streamable source of toxml objects from a file
+ * A streamable source of toxml objects from a file. The source file should contain
+ * a root element that in turn contains an arbitrary number of child elements. Each
+ * child element should contain the specified type of toxml object.
+ * <pre>
+ * &lt;Compounds&gt;
+ *   &lt;Compound&gt;
+ *     &lt;Ids&gt;&lt;Id type=&quot;reg&quot;&gt;LS-12345&lt;/Id&gt;&lt;/Ids&gt;
+ *   &lt;/Compound&gt;
+ * &lt;/Compounds&gt;
+ * </pre>
+ * 
+ * Could be parsed with: 
+ *   new ToxmlFileSource&lt;CompoundRecord&gt;(file, CompoundRecord.class);
  */
 public class ToxmlFileSource<T extends ToxmlObject> implements Iterable<T> {
   private File file;
   private Class<T> toxmlClass;
   
+  /**
+   * Creates an Iterable source for a toxml file
+   * @param file the file to read from - should contain a root element containing an
+   * arbitrary number of child elements that contain the given class of toxml object
+   * @param toxmlClass the class of toxml object that should appear in each child
+   * element of the root
+   */
   public ToxmlFileSource(File file, Class<T> toxmlClass) {
     this.file = file;
     this.toxmlClass = toxmlClass;
