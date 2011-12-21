@@ -78,12 +78,18 @@ public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
                 " Old object [" + oldObj + "]");
           }
           
-          Class<? extends ToxmlObject> childClass = obj.getChildClass(tagName);
-          if (childClass != null) {
-            ToxmlObject childObj = parseChild(obj, tagName, childClass);
-            obj.setChild(tagName, childObj);
+          Class<? extends ToxmlObject> childClass = null;
+          try {
+            childClass = obj.getChildClass(tagName);
+            if (childClass != null) {
+              ToxmlObject childObj = parseChild(obj, tagName, childClass);
+              obj.setChild(tagName, childObj);
+            }
+            else {
+              handleUnexpectedTag(obj, tagName);
+            }
           }
-          else {
+          catch (IllegalArgumentException iae) {
             handleUnexpectedTag(obj, tagName);
           }
         }
@@ -182,25 +188,13 @@ public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
   
   public ToxmlObject visit(StringValue obj) throws Exception {
     parseAbstractAttributes(obj);
-    String text = reader.getElementText();
-    try {
-      obj.setValue(text);
-    }
-    catch (Exception e) {
-      handleValueException(getTopParent(), getTopTag(), obj, text, e);
-    }
+    obj.setValue(reader.getElementText());
     return obj;
   }
 
   public ToxmlObject visit(CDataValue obj) throws Exception {
     parseAbstractAttributes(obj);
-    String text = reader.getElementText();
-    try {
-      obj.setValue(text);
-    }
-    catch (Exception e) {
-      handleValueException(getTopParent(), getTopTag(), obj, text, e);
-    }
+    obj.setValue(reader.getElementText());
     return obj;
   }
 
@@ -290,21 +284,8 @@ public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
   
   public ToxmlObject visit(TypedValue obj) throws Exception {
     parseAbstractAttributes(obj);
-    String type = reader.getAttributeValue(null, TYPE_ATTRIBUTE);
-    try {
-      obj.setType(type);
-    }
-    catch (Exception e) {
-      handleValueException(getTopParent(), getTopTag(), obj, type, e);
-    }
-    
-    String text = reader.getElementText();
-    try {
-      obj.setValue(text);
-    }
-    catch (Exception e) {
-      handleValueException(getTopParent(), getTopTag(), obj, text, e);
-    }
+    obj.setType(reader.getAttributeValue(null, TYPE_ATTRIBUTE));
+    obj.setValue(reader.getElementText());
     return obj;
   }
   
@@ -355,8 +336,7 @@ public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
       }
     }
     catch (NumberFormatException nfe) {
-      throw new ToxmlReaderException(reader.getLocation().getLineNumber(),
-          "Invalid number string: " + valueString);
+      handleValueException(getTopParent(), getTopTag(), obj, valueString, nfe);
     }      
   }
   
@@ -368,8 +348,7 @@ public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
         obj.setValue(value);
       }
       catch (NumberFormatException nfe) {
-        throw new ToxmlReaderException(reader.getLocation().getLineNumber(),
-            "Invalid number string: " + valueString);
+        handleValueException(getTopParent(), getTopTag(), obj, valueString, nfe);
       }        
     }
     else if (isStart(LOW_VALUE_TAG)) {
@@ -408,8 +387,7 @@ public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
         obj.setValue(value);
       }
       catch (NumberFormatException nfe) {
-        throw new ToxmlReaderException(reader.getLocation().getLineNumber(),
-            "Invalid number string: " + valueString);
+        handleValueException(getTopParent(), getTopTag(), obj, valueString, nfe);
       }        
     }
     else if (isStart(LOW_VALUE_TAG)) {
@@ -487,15 +465,7 @@ public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
     }
   }
   
-  private void handleUnexpectedTag(CompositeToxmlObject parent, String tag) {
-    for (int i = errorHandlers.size()-1; i >= 0; i--) {
-      if (errorHandlers.get(i).unexpectedTag(reader, parent, tag)) {
-        return;
-      }
-    }
-  }
-  
-  private <T extends ToxmlObject> void handleUnexpectedTag(ToxmlObjectContainer<T> parent, String tag) {
+  private void handleUnexpectedTag(ToxmlObjectParent parent, String tag) {
     for (int i = errorHandlers.size()-1; i >= 0; i--) {
       if (errorHandlers.get(i).unexpectedTag(reader, parent, tag)) {
         return;

@@ -15,7 +15,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.leadscope.stucco;
+package com.leadscope.stucco.model;
+
+import com.leadscope.stucco.Quantity;
+import com.leadscope.stucco.Units;
 
 import junit.framework.TestCase;
 

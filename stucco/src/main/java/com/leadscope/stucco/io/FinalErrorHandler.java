@@ -25,12 +25,7 @@ import com.leadscope.stucco.*;
  * A final error handler that throws an exception for every encountered error
  */
 public class FinalErrorHandler implements ToxmlErrorHandler {
-  public boolean unexpectedTag(XMLStreamReader reader, CompositeToxmlObject parent, String tag) throws ToxmlReaderException {
-    throw new ToxmlReaderException(reader.getLocation().getLineNumber(),
-        "Unexpected element: " + tag + " in class: " + parent.getClass().getName());
-  }
-
-  public <T extends ToxmlObject> boolean unexpectedTag(XMLStreamReader reader, ToxmlObjectContainer<T> parent, String tag) throws ToxmlReaderException {
+  public boolean unexpectedTag(XMLStreamReader reader, ToxmlObjectParent parent, String tag) throws ToxmlReaderException {
     throw new ToxmlReaderException(reader.getLocation().getLineNumber(),
         "Unexpected element: " + tag + " in class: " + parent.getClass().getName());
   }

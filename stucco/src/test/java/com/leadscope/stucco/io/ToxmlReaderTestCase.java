@@ -62,7 +62,7 @@ public class ToxmlReaderTestCase extends TestCase {
       fail("Should have found invalid tag");
     }
     catch (Exception e) {
-      assertEquals("Unknown tag: NameBad at line: 1", e.getMessage());
+      assertEquals("Unexpected element: NameBad in class: com.leadscope.stucco.testModel.TestDatum at line: 1", e.getMessage());
     }
   }
     
@@ -149,6 +149,26 @@ public class ToxmlReaderTestCase extends TestCase {
     }
     catch (Exception e) {
       System.out.println("Correctly got exception: " + e.getMessage());
+    }
+  }
+  
+  public void testIgnoreElements() throws Throwable {
+    try {
+      IgnoreAdditionalTagsHandler errorHandler = new IgnoreAdditionalTagsHandler();
+      ToxmlParser.parse("<Compound>" +
+          "<Datasets>" +
+          "<Datum><Name>Foo</Name><Value>Bar</Value></Datum>" +
+          "<Datum><Name>Boo</Name><Value>Urns</Value></Datum>" +
+          "</Datasets>" +
+          "<UnknownElement><Inner>Some text</Inner></UnknownElement>" +
+          "<Structure><Smiles>OOOO</Smiles></Structure>" +
+          "</Compound>", TestCompound.class, errorHandler);
+      assertEquals("Should have skipped one tag", 1, errorHandler.getSkippedTags().size());
+      assertEquals("Should be correct message", "Skipped UnknownElement at line: 1", 
+          errorHandler.getSkippedTags().get(0).toString());
+    }
+    catch (ToxmlReaderException tre) {
+      fail("Should not have gotten exception: " + tre.getMessage());
     }
   }
 }

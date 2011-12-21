@@ -23,7 +23,7 @@ import com.leadscope.stucco.*;
 
 /**
  * An interface to an object that can allow a ToxmlReader to recover from
- * an error condition. Or optionally provide the exception message that
+ * some error conditions - or optionally provide an exception message that
  * should be thrown.
  */
 public interface ToxmlErrorHandler {
@@ -34,37 +34,25 @@ public interface ToxmlErrorHandler {
    * @param reader the reader with the eventType at START_ELEMENT of the invalid tag
    * @param parent the parent object
    * @param tag the tag that was seen
-   * @return true iff this handler was able to recover
+   * @return true iff this handler was able to recover - this method will also have parsed to
+   * the matching END_ELEMENT of the invalid tag 
    * @throws ToxmlReaderException if the handler decides to generate it's own exception
    */
   public boolean unexpectedTag(
       XMLStreamReader reader, 
-      CompositeToxmlObject parent, 
+      ToxmlObjectParent parent, 
       String tag) throws ToxmlReaderException;
-  
+    
   /**
-   * Called when an unexpected tag appeared within a container object. If the error handler is
-   * able to recover, the reader should be left at the END_ELEMENT of the invalid tag
-   * @param reader the reader with the eventType at START_ELEMENT of the invalid tag
-   * @param parent the parent object
-   * @param tag the tag that was seen
-   * @return true iff this handler was able to recover
-   * @throws ToxmlReaderException if the handler decides to generate it's own exception
-   */
-  public <T extends ToxmlObject> boolean unexpectedTag(
-      XMLStreamReader reader, 
-      ToxmlObjectContainer<T> parent, 
-      String tag) throws ToxmlReaderException;
-  
-  /**
-   * Called when an invalid value is encountered on a primitive type
+   * Called when an invalid value is encountered on a primitive type. This method should never
+   * perform any additional parsing on the reader
    * @param reader the reader with the eventType at END_ELEMENT of the invalid tag
    * @param parent the parent of the object
    * @param tag the tag for the invalid object
    * @param obj the object with the issue
    * @param value the value that was tried to be set
    * @param exception the exception that was thrown
-   * @return true iff the exception was handled and th
+   * @return true iff the exception was handled
    * @throws ToxmlReaderException
    */
   public boolean valueException(

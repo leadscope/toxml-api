@@ -15,10 +15,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.leadscope.stucco;
+package com.leadscope.stucco.model;
 
 import junit.framework.TestCase;
 
+import com.leadscope.stucco.DiffStatus;
+import com.leadscope.stucco.TypedValue;
 import com.leadscope.stucco.io.ToxmlParser;
 import com.leadscope.stucco.io.ToxmlWriter;
 import com.leadscope.stucco.model.CompoundRecord;
