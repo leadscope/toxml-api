@@ -17,11 +17,12 @@
  */
 package com.leadscope.stucco.apps;
 
-import java.io.File;
-
+import com.leadscope.stucco.io.IgnoreAdditionalTagsHandler;
 import com.leadscope.stucco.io.ToxmlHandler;
 import com.leadscope.stucco.io.ToxmlParser;
 import com.leadscope.stucco.model.CompoundRecord;
+
+import java.io.File;
 
 /**
  * A simple app that reads a toxml file and prints out id information
@@ -29,7 +30,7 @@ import com.leadscope.stucco.model.CompoundRecord;
  */
 public class ToxmlValidator {
   private static void usageExit() {
-    System.out.println("usage: toxml_validator <input file>");
+    System.out.println("usage: toxml_validator [--allow-additional-tags] <input file>");
     System.exit(1);
   }
 
@@ -51,13 +52,35 @@ public class ToxmlValidator {
    * @param args file
    */
   public static void main(String[] args) {
-    if (args.length != 1) {
+    if (args.length < 1 || args.length > 2) {
       usageExit();
     }
-    
-    File file = new File(args[0]);
+
+    File file = null;
+    boolean allowAdditionalTags = false;
+    if (args.length == 2) {
+      if (args[0].equals("--allow-additional-tags")) {
+        allowAdditionalTags = true;
+        file = new File(args[1]);
+      }
+      else {
+        usageExit();
+      }
+    }
+    else {
+      file = new File(args[0]);
+    }
+
     try {
-      ToxmlParser.parseList(file, CompoundRecord.class, new Handler());
+      if (allowAdditionalTags) {
+        IgnoreAdditionalTagsHandler ignoreHandler = new IgnoreAdditionalTagsHandler();
+        ToxmlParser.parseList(file, CompoundRecord.class, new Handler(), ignoreHandler);
+        ignoreHandler.getSkippedTags().stream()
+                .forEachOrdered(System.out::println);
+      }
+      else {
+        ToxmlParser.parseList(file, CompoundRecord.class, new Handler());
+      }
     }
     catch (Exception e) {
       e.printStackTrace();

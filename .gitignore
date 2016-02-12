@@ -1,4 +1,8 @@
 /.classpath
 /.project
 /.settings/
+/.idea
+/*.iml
+/stucco/*.iml
+/stucco-builder-plugin/*.iml
 /target

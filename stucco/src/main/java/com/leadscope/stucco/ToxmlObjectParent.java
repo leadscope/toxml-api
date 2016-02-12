@@ -27,5 +27,5 @@ public interface ToxmlObjectParent extends ToxmlObject {
    * Returns a new list containing all child stored under this parent
    * @return a new list of the children
    */
-  public List<ToxmlObject> getChildren();
+  List<? extends ToxmlObject> getChildren();
 }

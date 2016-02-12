@@ -17,10 +17,12 @@
  */
 package com.leadscope.stucco.builder;
 
-import java.io.*;
-import java.util.*;
-
 import nu.xom.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * Generates the source code for the toxml model based on the specification export
@@ -357,6 +359,9 @@ public class ToxmlModelGenerator {
     }    
     else if ("OriginalDosageRegimen".equals(name)) {
       name = "DosageRegimen";
+    }
+    else if ("DosageRegimen".equals(name) && "DosageRegimenTimeline".equals(parentTag)) {
+      name = "DosageRegimenWithTimeline";
     }
     else if (isCompoundRoot(element)) {
       name = "CompoundRecord";

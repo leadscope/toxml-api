@@ -18,6 +18,7 @@
 package com.leadscope.stucco;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * A container of toxml objects - could be an ordered list or unordered set
@@ -73,12 +74,19 @@ public interface ToxmlObjectContainer<T extends ToxmlObject> extends ToxmlObject
    * @return true iff the child was found and removed
    */
   public boolean removeChild(T child);
-  
+
   /**
    * Gets the children currently stored in this container
    */
   public List<T> getValues();
-  
+
+  /**
+   * Returns a stream over the children
+   */
+  default Stream<T> stream() {
+    return getValues().stream();
+  }
+
   /**
    * Gets the ith element from the list
    * @param i the index

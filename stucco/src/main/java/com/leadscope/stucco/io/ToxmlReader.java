@@ -17,12 +17,10 @@
  */
 package com.leadscope.stucco.io;
 
-import java.util.*;
+import com.leadscope.stucco.*;
 
 import javax.xml.stream.XMLStreamReader;
-
-import com.leadscope.stucco.*;
-import com.leadscope.stucco.StringValue;
+import java.util.*;
 
 /**
  * Parses an arbitrary toxml object from an xml source. To use, construct an
@@ -48,6 +46,7 @@ public class ToxmlReader implements ToxmlVisitor<ToxmlObject>, ToxmlXmlConstants
   public ToxmlReader(XMLStreamReader reader) {
     this.reader = reader;
     errorHandlers.add(new FinalErrorHandler());
+    errorHandlers.add(new IgnoreLegacyTagsHandler());
   }
 
   /**

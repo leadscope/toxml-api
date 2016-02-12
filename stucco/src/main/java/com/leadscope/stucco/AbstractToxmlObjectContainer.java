@@ -111,8 +111,8 @@ public abstract class AbstractToxmlObjectContainer<T extends ToxmlObject>
     return values.get(i);
   }
 
-  public List<ToxmlObject> getChildren() {
-    return new ArrayList<ToxmlObject>(values);
+  public List<T> getChildren() {
+    return new ArrayList<>(values);
   }
 
   public List<ToxmlObject> getValuesByPath(ToxmlPath path) throws IllegalArgumentException {
