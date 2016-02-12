@@ -1,6 +1,6 @@
 /**
  * Stucco ToxML API - a Java interface for parsing and creating ToxML documents
- * Copyright (C) 2011 Scott Miller - Leadscope, Inc.
+ * Copyright (C) 2016 Scott Miller - Leadscope, Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
