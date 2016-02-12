@@ -17,12 +17,13 @@
  */
 package com.leadscope.stucco.builder;
 
-import java.util.*;
-
 import org.antlr.stringtemplate.StringTemplate;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class CompositeClass extends ToxmlClass {
-  private List<CompositeMember> members = new ArrayList<CompositeMember>();
+  private List<CompositeMember> members = new ArrayList<>();
 
   public CompositeClass copy(String newName) {
     try {
@@ -142,9 +143,45 @@ public class CompositeClass extends ToxmlClass {
     }
     return member.getDescription();
   }
-    
+
+  protected List<String> getInterfaceNames() {
+    List<String> commonSuffixes = Arrays.asList(
+            "TestResults", "TestSystem",
+            "TestCondition", "NegativeTestControl", "PositiveTestControl",
+            "PhysicalCharacteristics", "SolventVehicleSubstanceQuantity",
+            "EndPoint"
+    );
+
+    for (String suffix : commonSuffixes) {
+      if (getName().equals(getStudyTypeName() + suffix)) {
+        return Arrays.asList(suffix);
+      }
+    }
+    if (getName().equals(getStudyTypeName() + "Treatment")) {
+      return Arrays.asList("StudyTreatment");
+    }
+    if (getName().equals(getStudyTypeName() + "GenericResultFindings")) {
+      return Arrays.asList("TreatmentResultFindings");
+    }
+    if (getName().equals(getStudyTypeName() + "Background")) {
+      return Arrays.asList("StudyBackground");
+    }
+    if (getName().equals(getStudyTypeName() + "Results")) {
+      return Arrays.asList("TreatmentResults");
+    }
+    return new ArrayList<>(0);
+  }
+
   public void fillInTemplate(StringTemplate st) {
     st.setAttribute("members", members);
+    if (getInterfaceNames().size() > 0) {
+      String interfaceList = getInterfaceNames().stream().collect(Collectors.joining(", "));
+      st.setAttribute("implementsString", "implements " + interfaceList + " ");
+    }
+    else {
+      st.setAttribute("implementsString", "");
+    }
+
   }
   
   public String toString(String tag, int indent) {

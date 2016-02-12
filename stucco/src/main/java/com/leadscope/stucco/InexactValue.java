@@ -436,6 +436,10 @@ public class InexactValue extends AbstractPrimitiveToxmlObject
     }    
   }
 
+  public String toString() {
+    return toDisplayableString();
+  }
+
   /**
    * Creates a readable version of the inexact value; can be parsed with <code>parse</code>
    * @return nicely formatted version of this inexact value

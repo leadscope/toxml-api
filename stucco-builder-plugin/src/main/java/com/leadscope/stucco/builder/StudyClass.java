@@ -17,8 +17,15 @@
  */
 package com.leadscope.stucco.builder;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class StudyClass extends CompositeClass {
   protected String getTemplateName() {
     return "com/leadscope/stucco/builder/CompositeClass";
+  }
+
+  protected List<String> getInterfaceNames() {
+    return Arrays.asList("Study");
   }
 }

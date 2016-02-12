@@ -236,7 +236,7 @@ public class ToxmlModelGenerator {
     else {
       composite = new CompositeClass();
     }
-        
+
     Elements childElements = node.getChildElements(Spec.ELEMENT);
     for (int i = 0; i < childElements.size(); i++) {
       Element childElement = childElements.get(i);
