@@ -11,19 +11,19 @@
     <developer>
       <name>Scott Miller</name>
       <organization>Leadscope, Inc.</organization>
-      <organizationUrl>http://leadscope.com</organizationUrl>
-      <url>https://github.com/smiller-leadscope</url>
+      <organizationUrl>http://www.leadscope.com</organizationUrl>
+      <url>https://github.com/leadscope</url>
     </developer>
   </developers>
   <organization>
     <name>Leadscope, Inc.</name>
-    <url>http://leadscope.com</url>
+    <url>http://www.leadscope.com</url>
   </organization>
   <inceptionYear>2011</inceptionYear>
   <licenses>
     <license>
-      <name>GNU GPL v3</name>
-      <url>http://www.gnu.org/licenses/gpl.txt</url>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
