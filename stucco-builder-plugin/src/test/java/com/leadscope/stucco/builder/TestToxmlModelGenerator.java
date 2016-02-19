@@ -1,4 +1,3 @@
-
 package com.leadscope.stucco.builder;
 
 import java.io.*;
