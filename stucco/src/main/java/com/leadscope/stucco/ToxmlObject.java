@@ -28,13 +28,13 @@ public interface ToxmlObject {
    * ToxML elements need to be camel cased (starting with a capital letter) and
    * can only contain letters an digits
    */
-  public static Pattern validTagPattern = Pattern
+  Pattern validTagPattern = Pattern
       .compile("^(?!XML)[A-Z][a-zA-Z0-9]*");
   
   /**
    * Source strings cannot contain commas
    */
-  public static Pattern validSourcePattern = Pattern
+  Pattern validSourcePattern = Pattern
       .compile("[^,]+");
   
   /**
@@ -42,14 +42,14 @@ public interface ToxmlObject {
    * @return the parent containing this object; null if this is the root or if
    * the object is not attached to a toxml hierarchy
    */
-  public ToxmlObjectParent getParent();
+  ToxmlObjectParent getParent();
   
   /**
    * Sets the parent of this object
    * @param parent the parent for this object - should be a container or composite that
    * holds this object
    */
-  public void setParent(ToxmlObjectParent parent);
+  void setParent(ToxmlObjectParent parent);
   
   /**
    * Gets the list of values by path. An empty list is returned if any
@@ -59,7 +59,7 @@ public interface ToxmlObject {
    * @exception IllegalArgumentException if any of the tags in the path are
    * invalid from this object
    */
-  public List<ToxmlObject> getValuesByPath(ToxmlPath path) throws IllegalArgumentException;
+  List<ToxmlObject> getValuesByPath(ToxmlPath path) throws IllegalArgumentException;
   
   /**
    * Checks to see if the given path results in a single object that is equals() to
@@ -70,7 +70,7 @@ public interface ToxmlObject {
    * @exception IllegalArgumentExcepiton if any of the tags in the path are invalid
    * from this object
    */
-  public boolean valueByPathEquals(ToxmlPath path, ToxmlObject value) throws IllegalArgumentException;
+  boolean valueByPathEquals(ToxmlPath path, ToxmlObject value) throws IllegalArgumentException;
 
   /**
    * Checks to see if the given path results in a single object that is equals() to
@@ -81,46 +81,46 @@ public interface ToxmlObject {
    * @exception IllegalArgumentExcepiton if any of the tags in the path are invalid
    * from this object
    */
-  public boolean valueByPathEquals(ToxmlPath path, String value) throws IllegalArgumentException;
+  boolean valueByPathEquals(ToxmlPath path, String value) throws IllegalArgumentException;
 
   /**
    * Sets the sources for this object 
    * @param sources the set of source strings - each source string must be a 
    * validSourcePattern
    */
-  public void setSources(Collection<String> sources) throws IllegalArgumentException;
+  void setSources(Collection<String> sources) throws IllegalArgumentException;
   
   /**
    * Adds a source to this object
    * @param source the source to add - must be validSourcePattern
    */
-  public void addSource(String source) throws IllegalArgumentException;
+  void addSource(String source) throws IllegalArgumentException;
   
   /**
    * Gets the list of sources for this object
    * @return the sorted list of sources for this object
    */
-  public List<String> getSources();
+  List<String> getSources();
   
   /**
    * Determines if this object is considered empty and could be omitted
    * from the serialized xml
    */
-  public boolean isEmpty();
+  boolean isEmpty();
   
   /**
    * Sets the difference status for this object
    * @param status the status; null indicates that the object is present in both
    * source documents
    */
-  public void setDiffStatus(DiffStatus status);
+  void setDiffStatus(DiffStatus status);
   
   /**
    * Gets the difference status for this object
    * @return the status; null indicates that the object is present in both
    * source documents
    */
-  public DiffStatus getDiffStatus();
+  DiffStatus getDiffStatus();
   
   /**
    * Specifies what was the original value in the source document. This is
@@ -128,19 +128,19 @@ public interface ToxmlObject {
    * the difference
    * @param originalConflictValue the original value
    */
-  public void setOriginalConflictValue(String originalConflictValue);
+  void setOriginalConflictValue(String originalConflictValue);
   
   /**
    * Gets the original value in the source document.
    * @return a simple string that represents the original value; null if
    * there was no conflict
    */
-  public String getOriginalConflictValue();
+  String getOriginalConflictValue();
   
   /**
    * Clears everything regarding the difference status on this object
    */
-  public void clearDiffStatus();
+  void clearDiffStatus();
   
   /**
    * Determines if this object or any of its children contains a difference
@@ -148,7 +148,7 @@ public interface ToxmlObject {
    * will need to search children
    * @return true iff a difference exists within this object
    */
-  public boolean containsDiff();
+  boolean containsDiff();
 
   /**
    * Determines if this object or any of its children contains a conflict
@@ -157,11 +157,11 @@ public interface ToxmlObject {
    * will need to search children
    * @return true iff a conflict exists within this object
    */
-  public boolean containsConflict();
+  boolean containsConflict();
   
   /**
    * Accepts the toxml visitor
    * @param visitor the visitor to accept
    */
-  public <V> V accept(ToxmlVisitor<V> visitor) throws Exception;
+  <V> V accept(ToxmlVisitor<V> visitor) throws Exception;
 }

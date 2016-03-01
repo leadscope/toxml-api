@@ -16,9 +16,10 @@
  */
 package com.leadscope.stucco.io;
 
-import javax.xml.stream.XMLStreamReader;
+import com.leadscope.stucco.PrimitiveToxmlObject;
+import com.leadscope.stucco.ToxmlObjectParent;
 
-import com.leadscope.stucco.*;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * An interface to an object that can allow a ToxmlReader to recover from
@@ -37,7 +38,7 @@ public interface ToxmlErrorHandler {
    * the matching END_ELEMENT of the invalid tag 
    * @throws ToxmlReaderException if the handler decides to generate it's own exception
    */
-  public boolean unexpectedTag(
+  boolean unexpectedTag(
       XMLStreamReader reader, 
       ToxmlObjectParent parent, 
       String tag) throws ToxmlReaderException;
@@ -54,7 +55,7 @@ public interface ToxmlErrorHandler {
    * @return true iff the exception was handled
    * @throws ToxmlReaderException
    */
-  public boolean valueException(
+  boolean valueException(
       XMLStreamReader reader, 
       ToxmlObjectParent parent, 
       String tag,

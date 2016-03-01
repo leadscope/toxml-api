@@ -26,12 +26,12 @@ public interface ContainerListener<T extends ToxmlObject> {
    * @param container the container that was modified
    * @param value the value that was removed
    */
-  public void removed(ToxmlObjectContainer<T> container, T value);
+  void removed(ToxmlObjectContainer<T> container, T value);
   
   /**
    * Called after an object has been added to the container
    * @param container the container that was modified
    * @param value the value that was added
    */
-  public void added(ToxmlObjectContainer<T> container, T value);
+  void added(ToxmlObjectContainer<T> container, T value);
 }

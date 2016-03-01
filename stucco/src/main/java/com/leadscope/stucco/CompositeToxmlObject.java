@@ -26,14 +26,14 @@ public interface CompositeToxmlObject extends ToxmlObjectParent {
    * Gets the list of valid child tags that can be used with getChild
    * @return the list of string child tags
    */
-  public List<String> getChildTags();
+  List<String> getChildTags();
   
   /**
    * Gets the child value for the given tag
    * @param tag the tag of the child object
    * @return the value assigned to the give tag; null if not assigned
    */
-  public ToxmlObject getChild(String tag);
+  ToxmlObject getChild(String tag);
   
   /**
    * Sets the value of the child - also updates the parent for the given child
@@ -43,14 +43,14 @@ public interface CompositeToxmlObject extends ToxmlObjectParent {
    * @exception IllegalArgumentException if value has already been assigned to another parent
    * @exception ClassCastException if the child is of the wrong type
    */
-  public void setChild(String tag, ToxmlObject value);
+  void setChild(String tag, ToxmlObject value);
   
   /**
    * Gets the class of the child that should appear under the given tag
    * @param tag the tag of the child class to get
    * @return the child class
    */
-  public Class<? extends ToxmlObject> getChildClass(String tag);
+  Class<? extends ToxmlObject> getChildClass(String tag);
   
   /**
    * Adds a listener for updates to this composite. Listeners will be notified
@@ -60,7 +60,7 @@ public interface CompositeToxmlObject extends ToxmlObjectParent {
    * you'll need to call removeListener(listener).
    * @param listener the listener to add
    */
-  public void addListener(CompositeListener listener);
+  void addListener(CompositeListener listener);
   
   /**
    * Removes a listener for updates to this composite. Call this method when you
@@ -69,5 +69,5 @@ public interface CompositeToxmlObject extends ToxmlObjectParent {
    * referenced.
    * @param listener the listener to add
    */
-  public void removeListener(CompositeListener listener);
+  void removeListener(CompositeListener listener);
 }

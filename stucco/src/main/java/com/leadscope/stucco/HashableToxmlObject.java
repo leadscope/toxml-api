@@ -26,10 +26,10 @@ public interface HashableToxmlObject extends ToxmlObject {
    * @return true iff the other object is equivalent with this one for the purposes
    * of storing in a ToxmlObjectSet
    */
-  public boolean equals(Object other);
+  boolean equals(Object other);
 
   /**
    * @return a hash code that only uses members also utilized in equals()
    */
-  public int hashCode();
+  int hashCode();
 }

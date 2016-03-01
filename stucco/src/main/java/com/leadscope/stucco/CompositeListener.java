@@ -27,7 +27,7 @@ public interface CompositeListener {
    * @param oldValue the old value that had previously been assigned to the given tag
    * @param newValue the new value that is now assigned to the given tag
    */
-  public void valueChanged(
+  void valueChanged(
       CompositeToxmlObject composite, 
       String tag,
       ToxmlObject oldValue,

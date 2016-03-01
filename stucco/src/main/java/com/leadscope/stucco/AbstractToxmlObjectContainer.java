@@ -98,22 +98,6 @@ public abstract class AbstractToxmlObjectContainer<T extends ToxmlObject>
     return false;
   }
 
-  public boolean isEmpty() {
-    return values.isEmpty();
-  }
-  
-  public int size() {
-    return values.size();
-  }
-
-  public T get(int i) {
-    return values.get(i);
-  }
-
-  public List<T> getChildren() {
-    return new ArrayList<>(values);
-  }
-
   public List<ToxmlObject> getValuesByPath(ToxmlPath path) throws IllegalArgumentException {
     if (path == null) {
       return Arrays.asList((ToxmlObject)this);

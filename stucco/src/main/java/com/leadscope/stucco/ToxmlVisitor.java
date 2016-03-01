@@ -22,22 +22,22 @@ package com.leadscope.stucco;
  */
 public interface ToxmlVisitor<V> {
 
-  public V visit(CompositeToxmlObject obj) throws Exception;
+  V visit(CompositeToxmlObject obj) throws Exception;
   
-  public <T extends ToxmlObject> V visit(ToxmlObjectList<T> obj) throws Exception;
+  <T extends ToxmlObject> V visit(ToxmlObjectList<T> obj) throws Exception;
   
-  public <T extends HashableToxmlObject> V visit(ToxmlObjectSet<T> obj) throws Exception;
+  <T extends HashableToxmlObject> V visit(ToxmlObjectSet<T> obj) throws Exception;
   
-  public V visit(StringValue obj) throws Exception;  
-  public V visit(CDataValue obj) throws Exception;  
-  public V visit(BooleanValue obj) throws Exception;
-  public V visit(DateValue obj) throws Exception;
-  public V visit(FloatValue obj) throws Exception;
-  public V visit(IntegerValue obj) throws Exception;
-  public V visit(IntegerRange obj) throws Exception;
-  public V visit(IntegerArray obj) throws Exception;
-  public V visit(InexactValue obj) throws Exception;
-  public V visit(Units obj) throws Exception;
-  public V visit(TypedValue obj) throws Exception;
-  public V visit(AbstractToxmlEnumeratedType obj) throws Exception;
+  V visit(StringValue obj) throws Exception;
+  V visit(CDataValue obj) throws Exception;
+  V visit(BooleanValue obj) throws Exception;
+  V visit(DateValue obj) throws Exception;
+  V visit(FloatValue obj) throws Exception;
+  V visit(IntegerValue obj) throws Exception;
+  V visit(IntegerRange obj) throws Exception;
+  V visit(IntegerArray obj) throws Exception;
+  V visit(InexactValue obj) throws Exception;
+  V visit(Units obj) throws Exception;
+  V visit(TypedValue obj) throws Exception;
+  V visit(AbstractToxmlEnumeratedType obj) throws Exception;
 }
